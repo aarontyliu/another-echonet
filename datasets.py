@@ -33,16 +33,19 @@ class EchoNetDataset(Dataset):
             "val",
             "test",
         ), "Please validate the split specification (train, val or test)"
+        self.tracing = pd.read_csv('/home/tienyu/data/EchoNet-Dynamic/VolumeTracings.csv')
+        valid_clips = self.tracing.FileName.str.replace('.avi', '').unique()
+
         self.split = split.upper()
         self.sampling_frequency = sampling_frequency
         self.clip_length = clip_length
         self.min_num_frames = self.clip_length * self.sampling_frequency
         self.df = pd.read_csv(target_csv)
+        valid_idx = np.isin(self.df.FileName, valid_clips)
+        self.df = self.df[valid_idx]
         self.df = self.df.loc[
             (self.df["Split"] == self.split)
             & (self.df["NumberOfFrames"] > self.min_num_frames)
-            # & (self.df['FrameHeight'] == 112)
-            # & (self.df['FrameWidth'] == 112)
         ]
         # self.max_num_frames = self.df.NumberOfFrames.max()
         self.root_dir = root_dir

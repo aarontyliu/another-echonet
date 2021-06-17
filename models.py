@@ -8,17 +8,13 @@ from torch.utils.data import DataLoader
 from torchvision import models
 
 
-class EchoNetClassifier(nn.Module):
+class EchoNetRegressor(nn.Module):
     def __init__(self):
         super().__init__()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        # Encoder:
         # self.encoder = EfficientNetEncoder(name="efficientnet-b0")
         self.encoder = ResNetEncoder()
-        # Decoder
-        # self.decoder = LSTMDecoder(11520, 30, 2, 2)
         self.decoder = LSTMDecoder(256, 256, 2, 1)
-        # self.decoder = TransformerDecoder()
 
     def forward(self, x):
         x = self.encode(x)
@@ -50,20 +46,20 @@ class EchoNetClassifier(nn.Module):
 class ResNetEncoder(nn.Module):
     def __init__(self):
         super(ResNetEncoder, self).__init__()
-        self.encoder = models.resnet50(pretrained=True)
+        self.encoder = models.resnet50(pretrained=False)
         self.fc1 = nn.Linear(self.encoder.fc.in_features, 512)
         self.bn1 = nn.BatchNorm1d(512, momentum=0.01)
-        # self.fc2 = nn.Linear(512, 512)
-        # self.bn2 = nn.BatchNorm1d(512, momentum=0.01)
-        # self.dropout = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(512, 512)
+        self.bn2 = nn.BatchNorm1d(512, momentum=0.01)
+        self.dropout = nn.Dropout(0.3)
         self.fc3 = nn.Linear(512, 256)
         self.encoder.fc = nn.Identity()
 
     def forward(self, x):
         x = self.encoder(x)
         x = F.relu(self.bn1(self.fc1(x)))
-        # x = F.relu(self.bn2(self.fc2(x)))
-        # x = self.dropout(x)
+        x = F.relu(self.bn2(self.fc2(x)))
+        x = self.dropout(x)
         x = self.fc3(x)
 
         return x
@@ -75,11 +71,19 @@ class EfficientNetEncoder(nn.Module):
         self.name = name
         self.encoder = EfficientNet.from_name(self.name)
         self.encoder._avg_pooling = nn.Identity()
-        self.encoder._fc = nn.Identity()
         self.encoder._swish = nn.Identity()
+        self.fc1 = nn.Linear(self.encoder._fc.in_features * 3 * 3, 512)
+        self.bn1 = nn.BatchNorm1d(512, momentum=0.01)
+        self.dropout = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(512, 256)
+        self.encoder._fc = nn.Identity()
+
 
     def forward(self, x):
         x = self.encoder(x)
+        x = F.relu(self.bn1(self.fc1(x)))
+        x = self.dropout(x)
+        x = self.fc2(x)
 
         return x
 
@@ -131,7 +135,7 @@ class PositionalEncoding(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
-    def __init__(self, d_model=300, num_outputs=2, nlayers=3, dropout=0.3, nhead=10):
+    def __init__(self, d_model=256, num_outputs=2, nlayers=3, dropout=0.3, nhead=8):
         super(TransformerDecoder, self).__init__()
         self.nhead = nhead
         self.pos_encoder = PositionalEncoding(d_model, dropout)
