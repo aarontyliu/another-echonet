@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from efficientnet_pytorch import EfficientNet
+# from efficientnet_pytorch import EfficientNet
 from torch.utils.data import DataLoader
 from torchvision import models
 
