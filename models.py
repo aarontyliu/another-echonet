@@ -18,23 +18,23 @@ class EchoNet(nn.Module):
         self.unet = UNet(n_channels=1, n_classes=1, bilinear=True)
 
         # ==================
-        # Encoder: ResNet18
+        # Encoder: resnext50_32x4d
         # ==================
-        resnet18 = models.resnet18(pretrained=False)
+        resnext50_32x4d = models.resnext50_32x4d(pretrained=False)
         # Adapt to input channel (1)
-        resnet18.conv1 = nn.Conv2d(
+        resnext50_32x4d.conv1 = nn.Conv2d(
             1, 64, kernel_size=7, stride=2, padding=3, bias=False
         )
-        self.encoder = torch.nn.ModuleList(list(resnet18.children())[:-1])
+        self.encoder = torch.nn.ModuleList(list(resnext50_32x4d.children())[:-1])
         self.encoder.append(nn.Flatten())
         self.encoder = torch.nn.Sequential(*self.encoder)
 
         self.regressor = torch.nn.Sequential(
             *[
-                nn.Linear(resnet18.fc.in_features, self.encoder_hidden_dim),
+                nn.Linear(resnext50_32x4d.fc.in_features, self.encoder_hidden_dim),
                 nn.BatchNorm1d(self.encoder_hidden_dim, momentum=0.01),
-                nn.Relu(inplace=True),
-                nn.Dropout(0.3, inplace=True),
+                nn.ReLU(),
+                nn.Dropout(0.3),
                 nn.Linear(self.encoder_hidden_dim, 1),
             ]
         )
@@ -43,7 +43,7 @@ class EchoNet(nn.Module):
         # Decoder: LSTM
         # ==================
         self.decoder = LSTMDecoder(
-            input_dim=resnet18.fc.in_features,
+            input_dim=resnext50_32x4d.fc.in_features + 1,
             hidden_dim=256,
             num_layers=2,
             num_outputs=1,
@@ -51,7 +51,7 @@ class EchoNet(nn.Module):
             dropout_p=0.3,
         )
 
-    def forward(self, x, goal="mask&volume"):
+    def forward(self, x, goal="mask&volume", tf_masks=None):
         assert goal in (
             "mask&volume",
             "ef",
@@ -59,17 +59,22 @@ class EchoNet(nn.Module):
 
         if goal == "mask&volume":
             assert x.dim() == 4, "Input needs to be (N x C x H x W)!"
-            mask = self.unet(x)
-            x = self.encoder(x)
+            masks = self.unet(x)
+            if tf_masks is not None:
+                x = self.encoder(tf_masks)
+            else:
+                x = self.encoder(masks)
             x = self.regressor(x)
 
-            return mask, x
+            return masks, x
 
         elif goal == "ef":
             assert x.dim() == 5, "Input needs to be (L x N x C x H x W)!"
 
-            x = self.embed(x)
-            x = self.decoder(x)
+            embeddings = self.embed(x)
+            x = self.decoder(
+                torch.cat([embeddings, self.aug_features(embeddings)], dim=2)
+            )
 
             return x
 
@@ -90,8 +95,23 @@ class EchoNet(nn.Module):
             ],
             dim=1,
         )
-
         return embeddings.to(self.device)
+
+    def aug_features(self, embeddings):
+        aug_f = torch.stack(
+            [
+                torch.cat(
+                    [
+                        self.regressor(b.to(self.device)).detach().cpu()
+                        for b in DataLoader(v, batch_size=32)
+                    ]
+                )
+                for v in embeddings
+            ],
+            dim=0,
+        )
+
+        return aug_f.to(self.device)
 
 
 class LSTMDecoder(nn.Module):

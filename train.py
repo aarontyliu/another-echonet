@@ -87,7 +87,7 @@ for epoch in range(num_epochs):
             video_tensor = inputs[0].to(device)
             input_frames = torch.cat(inputs[1:]).to(device)
             volumes = torch.cat(labels[1:]).unsqueeze(1).float().to(device)
-            masks = torch.cat(masks).to(device)
+            masks = torch.cat(masks).float().to(device)
             efs = labels[0].unsqueeze(1).float().to(device)
 
             if phase == "train":
@@ -97,7 +97,10 @@ for epoch in range(num_epochs):
             optimizer.zero_grad()
             with torch.set_grad_enabled(phase == "train"):
 
-                masks_pred, volumes_pred = model(input_frames, goal="mask&volume")
+                if phase == 'train':
+                    masks_pred, volumes_pred = model(input_frames, goal="mask&volume", tf_masks=masks)
+                else:
+                    masks_pred, volumes_pred = model(input_frames, goal="mask&volume")
                 # Compute losses
                 loss_seg = criterion_bce(masks_pred, masks)
                 loss_volume = criterion_mse(volumes_pred, volumes)
