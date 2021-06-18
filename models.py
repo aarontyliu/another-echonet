@@ -18,20 +18,20 @@ class EchoNet(nn.Module):
         self.unet = UNet(n_channels=1, n_classes=1, bilinear=True)
 
         # ==================
-        # Encoder: resnext50_32x4d
+        # Encoder: resnet18
         # ==================
-        resnext50_32x4d = models.resnext50_32x4d(pretrained=False)
+        resnet18 = models.resnet18(pretrained=False)
         # Adapt to input channel (1)
-        resnext50_32x4d.conv1 = nn.Conv2d(
+        resnet18.conv1 = nn.Conv2d(
             1, 64, kernel_size=7, stride=2, padding=3, bias=False
         )
-        self.encoder = torch.nn.ModuleList(list(resnext50_32x4d.children())[:-1])
+        self.encoder = torch.nn.ModuleList(list(resnet18.children())[:-1])
         self.encoder.append(nn.Flatten())
         self.encoder = torch.nn.Sequential(*self.encoder)
 
         self.regressor = torch.nn.Sequential(
             *[
-                nn.Linear(resnext50_32x4d.fc.in_features, self.encoder_hidden_dim),
+                nn.Linear(resnet18.fc.in_features, self.encoder_hidden_dim),
                 nn.BatchNorm1d(self.encoder_hidden_dim, momentum=0.01),
                 nn.ReLU(),
                 nn.Dropout(0.3),
@@ -43,7 +43,7 @@ class EchoNet(nn.Module):
         # Decoder: LSTM
         # ==================
         self.decoder = LSTMDecoder(
-            input_dim=resnext50_32x4d.fc.in_features + 1,
+            input_dim=resnet18.fc.in_features,
             hidden_dim=256,
             num_layers=2,
             num_outputs=1,
@@ -71,16 +71,10 @@ class EchoNet(nn.Module):
         elif goal == "ef":
             assert x.dim() == 5, "Input needs to be (L x N x C x H x W)!"
 
-            embeddings = self.embed(x)
-            x = self.decoder(
-                torch.cat([embeddings, self.aug_features(embeddings)], dim=2)
-            )
+            x = self.embed(x)
+            x = self.decoder(x)
 
             return x
-
-    def predict_mask(self, x):
-        with torch.no_grad():
-            return (self.unet(x) > 0.5).type(torch.float32)
 
     def embed(self, x):
         embeddings = torch.stack(
@@ -96,22 +90,6 @@ class EchoNet(nn.Module):
             dim=1,
         )
         return embeddings.to(self.device)
-
-    def aug_features(self, embeddings):
-        aug_f = torch.stack(
-            [
-                torch.cat(
-                    [
-                        self.regressor(b.to(self.device)).detach().cpu()
-                        for b in DataLoader(v, batch_size=32)
-                    ]
-                )
-                for v in embeddings
-            ],
-            dim=0,
-        )
-
-        return aug_f.to(self.device)
 
 
 class LSTMDecoder(nn.Module):

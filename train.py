@@ -88,7 +88,7 @@ for epoch in range(num_epochs):
             input_frames = torch.cat(inputs[1:]).to(device)
             volumes = torch.cat(labels[1:]).unsqueeze(1).float().to(device)
             masks = torch.cat(masks).float().to(device)
-            efs = labels[0].unsqueeze(1).float().to(device)
+            # efs = labels[0].unsqueeze(1).float().to(device) # Omit gt ef
 
             if phase == "train":
                 iterations += 1
@@ -106,6 +106,7 @@ for epoch in range(num_epochs):
                 loss_volume = criterion_mse(volumes_pred, volumes)
 
                 efs_pred = model(video_tensor, goal="ef")
+                efs = model.regressor(model.embed(x)) # Weekly supervision of ef
                 loss_ef = criterion_mse(efs_pred, efs)
 
                 loss_mse = loss_volume + loss_ef
