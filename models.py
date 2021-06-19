@@ -45,32 +45,35 @@ class EchoNet(nn.Module):
         self.decoder = LSTMDecoder(
             input_dim=resnet18.fc.in_features,
             hidden_dim=256,
-            num_layers=2,
+            num_layers=3,
             num_outputs=1,
             bidirectional=True,
             dropout_p=0.3,
         )
 
-    def forward(self, x, goal="mask&volume", tf_masks=None):
+    def forward(self, x, goal="volume"):
         assert goal in (
-            "mask&volume",
+            "volume",
+            "mask",
             "ef",
-        ), "Please verify the task ('mask&volume' / 'ef')!"
+        ), "Please verify the goal ('volume' / 'mask' / 'ef')!"
 
-        if goal == "mask&volume":
+        if goal == "volume":
             assert x.dim() == 4, "Input needs to be (N x C x H x W)!"
-            masks = self.unet(x)
-            if tf_masks is not None:
-                x = self.encoder(tf_masks)
-            else:
-                x = self.encoder(masks)
+            x = self.unet(x)
+            x = self.encoder(x)
             x = self.regressor(x)
 
-            return masks, x
+            return x
+
+        elif goal == "mask":
+            assert x.dim() == 4, "Input needs to be (N x C x H x W)!"
+            x = self.unet(x)
+
+            return x
 
         elif goal == "ef":
             assert x.dim() == 5, "Input needs to be (L x N x C x H x W)!"
-
             x = self.embed(x)
             x = self.decoder(x)
 
@@ -90,6 +93,19 @@ class EchoNet(nn.Module):
             dim=1,
         )
         return embeddings.to(self.device)
+
+    def _get_pseudo_ef(self, x):
+        with torch.no_grad():
+            vs = torch.stack(
+                [self.regressor(k) for k in self.embed(x).permute(1, 0, 2)]
+            ).squeeze(2)
+            return 100.0 * (
+                (vs.max(dim=1)[0] - vs.min(dim=1)[0]) / vs.max(dim=1)[0]
+            ).unsqueeze(1)
+
+    def predict_mask(self, x, threshold=0.5):
+        with torch.no_grad():
+            return (self.unet(x) > threshold).float()
 
 
 class LSTMDecoder(nn.Module):
@@ -120,6 +136,8 @@ class LSTMDecoder(nn.Module):
         self.bn1 = nn.BatchNorm1d(self.hidden_dim)
         self.dropout = nn.Dropout(self.dropout_p)
         self.fc2 = nn.Linear(self.hidden_dim, self.num_outputs)
+        self.sigmoid = nn.Sigmoid()
+        self.scale = 100.0
 
     def forward(self, x):
         x, _ = self.lstm(x)
@@ -128,46 +146,7 @@ class LSTMDecoder(nn.Module):
         x = F.relu(self.bn1(self.fc1(x)))
         x = self.dropout(x)
         x = self.fc2(x)
+        x = self.sigmoid(x)
+        x = self.scale * x
 
         return x
-
-
-# class PositionalEncoding(nn.Module):
-#     def __init__(self, d_model, dropout=0.1, max_len=64):
-#         super(PositionalEncoding, self).__init__()
-#         self.dropout = nn.Dropout(p=dropout)
-
-#         pe = torch.zeros(max_len, d_model)
-#         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-#         div_term = torch.exp(
-#             torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
-#         )
-#         pe[:, 0::2] = torch.sin(position * div_term)
-#         pe[:, 1::2] = torch.cos(position * div_term)
-#         pe = pe.unsqueeze(0).transpose(0, 1)
-#         self.register_buffer("pe", pe)
-
-#     def forward(self, x):
-#         x = x + self.pe[: x.size(0), :]
-
-#         return self.dropout(x)
-
-
-# class TransformerDecoder(nn.Module):
-#     def __init__(self, d_model=256, num_outputs=2, nlayers=3, dropout=0.3, nhead=8):
-#         super(TransformerDecoder, self).__init__()
-#         self.nhead = nhead
-#         self.pos_encoder = PositionalEncoding(d_model, dropout)
-#         decoder_layer = nn.TransformerDecoderLayer(d_model, nhead=nhead)
-#         self.transformer_decoder = nn.TransformerDecoder(
-#             decoder_layer, num_layers=nlayers
-#         )
-#         self.linear = nn.Linear(d_model, num_outputs)
-
-#     def forward(self, x):
-#         x_ = self.pos_encoder(x)
-#         output = self.transformer_decoder(x_, x)
-#         output = output.permute(1, 0, 2)[:, -1, :]
-#         output = self.linear(output)
-
-#         return output

@@ -1,0 +1,369 @@
+﻿Epoch 0/49
+--------------------
+[  7m 47s] Iteration:  200 | Train | Segmentation BCE Loss: 0.60604 Loss(v): 62.75578 Loss(ef): 0.19913
+[ 15m 26s] Iteration:  400 | Train | Segmentation BCE Loss: 0.52866 Loss(v): 58.21368 Loss(ef): 0.12249
+
+Total Val loss: 35.53328 | Segmentation BCE Loss: 0.38449 Loss(v): 34.28619 Loss(ef): 0.86260
+
+Epoch 1/49
+--------------------
+[ 25m 45s] Iteration:  600 | Train | Segmentation BCE Loss: 0.37299 Loss(v): 45.24435 Loss(ef): 0.04320
+[ 33m 24s] Iteration:  800 | Train | Segmentation BCE Loss: 0.35146 Loss(v): 40.38120 Loss(ef): 0.03933
+
+Total Val loss: 30.76777 | Segmentation BCE Loss: 0.23893 Loss(v): 30.17652 Loss(ef): 0.35232
+
+Epoch 2/49
+--------------------
+[ 43m 45s] Iteration: 1000 | Train | Segmentation BCE Loss: 0.24833 Loss(v): 27.55593 Loss(ef): 0.03613
+[ 51m 24s] Iteration: 1200 | Train | Segmentation BCE Loss: 0.23004 Loss(v): 24.83226 Loss(ef): 0.03508
+
+Total Val loss: 86.62674 | Segmentation BCE Loss: 0.23652 Loss(v): 85.64521 Loss(ef): 0.74501
+
+Epoch 3/49
+--------------------
+[ 61m 44s] Iteration: 1400 | Train | Segmentation BCE Loss: 0.19656 Loss(v): 17.21107 Loss(ef): 0.03881
+[ 69m 23s] Iteration: 1600 | Train | Segmentation BCE Loss: 0.18745 Loss(v): 20.35302 Loss(ef): 0.02862
+[ 77m  1s] Iteration: 1800 | Train | Segmentation BCE Loss: 0.18516 Loss(v): 19.93913 Loss(ef): 0.02679
+
+Total Val loss: 24.25387 | Segmentation BCE Loss: 0.17340 Loss(v): 23.46632 Loss(ef): 0.61414
+
+Epoch 4/49
+--------------------
+[ 87m 22s] Iteration: 2000 | Train | Segmentation BCE Loss: 0.15918 Loss(v): 18.10219 Loss(ef): 0.02114
+[ 94m 59s] Iteration: 2200 | Train | Segmentation BCE Loss: 0.15615 Loss(v): 18.12315 Loss(ef): 0.02099
+
+Total Val loss: 29.64548 | Segmentation BCE Loss: 0.13023 Loss(v): 28.74478 Loss(ef): 0.77047
+
+Epoch 5/49
+--------------------
+[105m 17s] Iteration: 2400 | Train | Segmentation BCE Loss: 0.13886 Loss(v): 16.36147 Loss(ef): 0.01835
+[112m 53s] Iteration: 2600 | Train | Segmentation BCE Loss: 0.13946 Loss(v): 16.65839 Loss(ef): 0.01748
+
+Total Val loss: 19.32704 | Segmentation BCE Loss: 0.12132 Loss(v): 18.22410 Loss(ef): 0.98162
+
+Epoch 6/49
+--------------------
+[123m 12s] Iteration: 2800 | Train | Segmentation BCE Loss: 0.13252 Loss(v): 15.65477 Loss(ef): 0.02287
+[130m 50s] Iteration: 3000 | Train | Segmentation BCE Loss: 0.13254 Loss(v): 16.47680 Loss(ef): 0.01657
+[138m 29s] Iteration: 3200 | Train | Segmentation BCE Loss: 0.13167 Loss(v): 16.24565 Loss(ef): 0.01601
+
+Total Val loss: 29.57651 | Segmentation BCE Loss: 0.12030 Loss(v): 28.66499 Loss(ef): 0.79122
+
+Epoch 7/49
+--------------------
+[148m 49s] Iteration: 3400 | Train | Segmentation BCE Loss: 0.12156 Loss(v): 14.97210 Loss(ef): 0.01463
+[156m 28s] Iteration: 3600 | Train | Segmentation BCE Loss: 0.12023 Loss(v): 14.93663 Loss(ef): 0.01355
+
+Total Val loss: 30.12644 | Segmentation BCE Loss: 0.11927 Loss(v): 29.59143 Loss(ef): 0.41573
+
+Epoch 8/49
+--------------------
+[166m 47s] Iteration: 3800 | Train | Segmentation BCE Loss: 0.11743 Loss(v): 14.89299 Loss(ef): 0.01332
+[174m 26s] Iteration: 4000 | Train | Segmentation BCE Loss: 0.11381 Loss(v): 15.04777 Loss(ef): 0.01255
+
+Total Val loss: 33.61312 | Segmentation BCE Loss: 0.10035 Loss(v): 32.99820 Loss(ef): 0.51457
+
+Epoch 9/49
+--------------------
+[184m 48s] Iteration: 4200 | Train | Segmentation BCE Loss: 0.10900 Loss(v): 14.90115 Loss(ef): 0.01165
+[192m 26s] Iteration: 4400 | Train | Segmentation BCE Loss: 0.10464 Loss(v): 14.10606 Loss(ef): 0.01085
+[200m  4s] Iteration: 4600 | Train | Segmentation BCE Loss: 0.10507 Loss(v): 14.30099 Loss(ef): 0.01045
+
+Total Val loss: 16.26115 | Segmentation BCE Loss: 0.09553 Loss(v): 15.54156 Loss(ef): 0.62407
+
+Epoch 10/49
+--------------------
+[210m 23s] Iteration: 4800 | Train | Segmentation BCE Loss: 0.10135 Loss(v): 13.40331 Loss(ef): 0.01012
+[218m  1s] Iteration: 5000 | Train | Segmentation BCE Loss: 0.09941 Loss(v): 13.69044 Loss(ef): 0.01000
+
+Total Val loss: 26.83532 | Segmentation BCE Loss: 0.10312 Loss(v): 26.16063 Loss(ef): 0.57156
+
+Epoch 11/49
+--------------------
+[228m 21s] Iteration: 5200 | Train | Segmentation BCE Loss: 0.10040 Loss(v): 13.03949 Loss(ef): 0.00922
+[235m 58s] Iteration: 5400 | Train | Segmentation BCE Loss: 0.09649 Loss(v): 13.03217 Loss(ef): 0.00885
+
+Total Val loss: 24.13050 | Segmentation BCE Loss: 0.10265 Loss(v): 23.44314 Loss(ef): 0.58471
+
+Epoch 12/49
+--------------------
+[246m 17s] Iteration: 5600 | Train | Segmentation BCE Loss: 0.09960 Loss(v): 11.62279 Loss(ef): 0.00871
+[253m 55s] Iteration: 5800 | Train | Segmentation BCE Loss: 0.09586 Loss(v): 12.55690 Loss(ef): 0.00819
+[261m 35s] Iteration: 6000 | Train | Segmentation BCE Loss: 0.09464 Loss(v): 12.73711 Loss(ef): 0.00817
+
+Total Val loss: 19.05987 | Segmentation BCE Loss: 0.08085 Loss(v): 18.33546 Loss(ef): 0.64355
+
+Epoch 13/49
+--------------------
+[271m 58s] Iteration: 6200 | Train | Segmentation BCE Loss: 0.08817 Loss(v): 12.01281 Loss(ef): 0.00727
+[279m 38s] Iteration: 6400 | Train | Segmentation BCE Loss: 0.08906 Loss(v): 12.35266 Loss(ef): 0.00750
+
+Total Val loss: 25.15184 | Segmentation BCE Loss: 0.08470 Loss(v): 24.62898 Loss(ef): 0.43816
+
+Epoch 14/49
+--------------------
+[289m 58s] Iteration: 6600 | Train | Segmentation BCE Loss: 0.08494 Loss(v): 11.95341 Loss(ef): 0.00684
+[297m 39s] Iteration: 6800 | Train | Segmentation BCE Loss: 0.08851 Loss(v): 12.20489 Loss(ef): 0.00694
+
+Total Val loss: 21.04971 | Segmentation BCE Loss: 0.08688 Loss(v): 20.63311 Loss(ef): 0.32972
+
+Epoch 15/49
+--------------------
+[308m 21s] Iteration: 7000 | Train | Segmentation BCE Loss: 0.08608 Loss(v): 11.94723 Loss(ef): 0.00678
+[315m 50s] Iteration: 7200 | Train | Segmentation BCE Loss: 0.08915 Loss(v): 11.28913 Loss(ef): 0.00661
+[323m 21s] Iteration: 7400 | Train | Segmentation BCE Loss: 0.08735 Loss(v): 11.48445 Loss(ef): 0.00650
+
+Total Val loss: 23.51098 | Segmentation BCE Loss: 0.07461 Loss(v): 22.98525 Loss(ef): 0.45112
+
+Epoch 16/49
+--------------------
+[333m 31s] Iteration: 7600 | Train | Segmentation BCE Loss: 0.08320 Loss(v): 11.65544 Loss(ef): 0.00653
+[341m  1s] Iteration: 7800 | Train | Segmentation BCE Loss: 0.08355 Loss(v): 11.59410 Loss(ef): 0.00630
+
+Total Val loss: 19.29661 | Segmentation BCE Loss: 0.08667 Loss(v): 18.71041 Loss(ef): 0.49952
+
+Epoch 17/49
+--------------------
+[351m 11s] Iteration: 8000 | Train | Segmentation BCE Loss: 0.08829 Loss(v): 11.06975 Loss(ef): 0.00581
+[358m 41s] Iteration: 8200 | Train | Segmentation BCE Loss: 0.08406 Loss(v): 10.92234 Loss(ef): 0.00576
+
+Total Val loss: 18.73203 | Segmentation BCE Loss: 0.08876 Loss(v): 18.08687 Loss(ef): 0.55640
+
+Epoch 18/49
+--------------------
+[368m 49s] Iteration: 8400 | Train | Segmentation BCE Loss: 0.08742 Loss(v): 10.97362 Loss(ef): 0.00678
+[376m 19s] Iteration: 8600 | Train | Segmentation BCE Loss: 0.08439 Loss(v): 11.06707 Loss(ef): 0.00633
+[383m 48s] Iteration: 8800 | Train | Segmentation BCE Loss: 0.08372 Loss(v): 10.95616 Loss(ef): 0.00591
+
+Total Val loss: 22.12324 | Segmentation BCE Loss: 0.07885 Loss(v): 21.66123 Loss(ef): 0.38316
+
+Epoch 19/49
+--------------------
+[393m 56s] Iteration: 9000 | Train | Segmentation BCE Loss: 0.08447 Loss(v): 10.56074 Loss(ef): 0.00549
+[401m 24s] Iteration: 9200 | Train | Segmentation BCE Loss: 0.08419 Loss(v): 10.59042 Loss(ef): 0.00563
+
+Total Val loss: 23.05606 | Segmentation BCE Loss: 0.07697 Loss(v): 22.53254 Loss(ef): 0.44655
+
+Epoch 20/49
+--------------------
+[411m 33s] Iteration: 9400 | Train | Segmentation BCE Loss: 0.08192 Loss(v): 11.47482 Loss(ef): 0.00563
+[419m  1s] Iteration: 9600 | Train | Segmentation BCE Loss: 0.08260 Loss(v): 10.50051 Loss(ef): 0.00541
+
+Total Val loss: 22.54893 | Segmentation BCE Loss: 0.07957 Loss(v): 22.19492 Loss(ef): 0.27443
+
+Epoch 21/49
+--------------------
+[429m 10s] Iteration: 9800 | Train | Segmentation BCE Loss: 0.08404 Loss(v): 10.39685 Loss(ef): 0.00594
+[436m 40s] Iteration: 10000 | Train | Segmentation BCE Loss: 0.08551 Loss(v): 10.29487 Loss(ef): 0.00579
+[444m  9s] Iteration: 10200 | Train | Segmentation BCE Loss: 0.08556 Loss(v): 10.37716 Loss(ef): 0.00570
+
+Total Val loss: 17.90457 | Segmentation BCE Loss: 0.08639 Loss(v): 17.34521 Loss(ef): 0.47297
+
+Epoch 22/49
+--------------------
+[454m 16s] Iteration: 10400 | Train | Segmentation BCE Loss: 0.08552 Loss(v): 10.42749 Loss(ef): 0.00541
+[461m 45s] Iteration: 10600 | Train | Segmentation BCE Loss: 0.08440 Loss(v): 10.50942 Loss(ef): 0.00555
+
+Total Val loss: 18.32720 | Segmentation BCE Loss: 0.08884 Loss(v): 17.75705 Loss(ef): 0.48131
+
+Epoch 23/49
+--------------------
+[471m 52s] Iteration: 10800 | Train | Segmentation BCE Loss: 0.08193 Loss(v): 9.78855 Loss(ef): 0.00543
+[479m 22s] Iteration: 11000 | Train | Segmentation BCE Loss: 0.08376 Loss(v): 10.24702 Loss(ef): 0.00518
+
+Total Val loss: 26.89505 | Segmentation BCE Loss: 0.10294 Loss(v): 26.48083 Loss(ef): 0.31128
+
+Epoch 24/49
+--------------------
+[489m 28s] Iteration: 11200 | Train | Segmentation BCE Loss: 0.08475 Loss(v): 10.39755 Loss(ef): 0.00520
+[496m 58s] Iteration: 11400 | Train | Segmentation BCE Loss: 0.08575 Loss(v): 10.36588 Loss(ef): 0.00523
+[504m 26s] Iteration: 11600 | Train | Segmentation BCE Loss: 0.08518 Loss(v): 10.10094 Loss(ef): 0.00520
+
+Total Val loss: 23.57419 | Segmentation BCE Loss: 0.07753 Loss(v): 22.76517 Loss(ef): 0.73149
+
+Epoch 25/49
+--------------------
+[514m 36s] Iteration: 11800 | Train | Segmentation BCE Loss: 0.08536 Loss(v): 9.59910 Loss(ef): 0.00484
+[522m  6s] Iteration: 12000 | Train | Segmentation BCE Loss: 0.08507 Loss(v): 9.79838 Loss(ef): 0.00509
+
+Total Val loss: 22.34244 | Segmentation BCE Loss: 0.09486 Loss(v): 21.93323 Loss(ef): 0.31435
+
+Epoch 26/49
+--------------------
+[532m 13s] Iteration: 12200 | Train | Segmentation BCE Loss: 0.08341 Loss(v): 9.58787 Loss(ef): 0.00525
+[539m 42s] Iteration: 12400 | Train | Segmentation BCE Loss: 0.08415 Loss(v): 9.40910 Loss(ef): 0.00502
+
+Total Val loss: 18.01250 | Segmentation BCE Loss: 0.07933 Loss(v): 17.54166 Loss(ef): 0.39150
+
+Epoch 27/49
+--------------------
+[549m 51s] Iteration: 12600 | Train | Segmentation BCE Loss: 0.08623 Loss(v): 9.42495 Loss(ef): 0.00434
+[557m 22s] Iteration: 12800 | Train | Segmentation BCE Loss: 0.08525 Loss(v): 9.34405 Loss(ef): 0.00440
+
+Total Val loss: 23.63810 | Segmentation BCE Loss: 0.09687 Loss(v): 22.94492 Loss(ef): 0.59631
+
+Epoch 28/49
+--------------------
+[567m 31s] Iteration: 13000 | Train | Segmentation BCE Loss: 0.09613 Loss(v): 7.95549 Loss(ef): 0.00462
+[574m 60s] Iteration: 13200 | Train | Segmentation BCE Loss: 0.08930 Loss(v): 9.37841 Loss(ef): 0.00481
+[582m 29s] Iteration: 13400 | Train | Segmentation BCE Loss: 0.08887 Loss(v): 9.28911 Loss(ef): 0.00474
+
+Total Val loss: 20.67704 | Segmentation BCE Loss: 0.08833 Loss(v): 20.33007 Loss(ef): 0.25865
+
+Epoch 29/49
+--------------------
+[592m 37s] Iteration: 13600 | Train | Segmentation BCE Loss: 0.08479 Loss(v): 9.44818 Loss(ef): 0.00451
+[600m  9s] Iteration: 13800 | Train | Segmentation BCE Loss: 0.08722 Loss(v): 9.33305 Loss(ef): 0.00464
+
+Total Val loss: 21.37710 | Segmentation BCE Loss: 0.08701 Loss(v): 20.55993 Loss(ef): 0.73017
+
+Epoch 30/49
+--------------------
+[610m 17s] Iteration: 14000 | Train | Segmentation BCE Loss: 0.09076 Loss(v): 9.11793 Loss(ef): 0.00447
+[617m 47s] Iteration: 14200 | Train | Segmentation BCE Loss: 0.08893 Loss(v): 8.96527 Loss(ef): 0.00494
+
+Total Val loss: 16.45917 | Segmentation BCE Loss: 0.09634 Loss(v): 16.03637 Loss(ef): 0.32647
+
+Epoch 31/49
+--------------------
+[627m 55s] Iteration: 14400 | Train | Segmentation BCE Loss: 0.09504 Loss(v): 10.66978 Loss(ef): 0.00486
+[635m 25s] Iteration: 14600 | Train | Segmentation BCE Loss: 0.08760 Loss(v): 9.06432 Loss(ef): 0.00474
+[642m 57s] Iteration: 14800 | Train | Segmentation BCE Loss: 0.08552 Loss(v): 8.94369 Loss(ef): 0.00475
+
+Total Val loss: 16.54105 | Segmentation BCE Loss: 0.09123 Loss(v): 16.12801 Loss(ef): 0.32180
+
+Epoch 32/49
+--------------------
+[653m  8s] Iteration: 15000 | Train | Segmentation BCE Loss: 0.08641 Loss(v): 8.39638 Loss(ef): 0.00459
+[660m 38s] Iteration: 15200 | Train | Segmentation BCE Loss: 0.08562 Loss(v): 8.77262 Loss(ef): 0.00476
+
+Total Val loss: 16.17606 | Segmentation BCE Loss: 0.08022 Loss(v): 15.77704 Loss(ef): 0.31880
+
+Epoch 33/49
+--------------------
+[670m 46s] Iteration: 15400 | Train | Segmentation BCE Loss: 0.08617 Loss(v): 8.81378 Loss(ef): 0.00501
+[678m 16s] Iteration: 15600 | Train | Segmentation BCE Loss: 0.08621 Loss(v): 8.69478 Loss(ef): 0.00481
+
+Total Val loss: 25.48435 | Segmentation BCE Loss: 0.09234 Loss(v): 24.81991 Loss(ef): 0.57210
+
+Epoch 34/49
+--------------------
+[688m 22s] Iteration: 15800 | Train | Segmentation BCE Loss: 0.09948 Loss(v): 9.00790 Loss(ef): 0.00459
+[695m 51s] Iteration: 16000 | Train | Segmentation BCE Loss: 0.08992 Loss(v): 8.71476 Loss(ef): 0.00483
+[703m 21s] Iteration: 16200 | Train | Segmentation BCE Loss: 0.08907 Loss(v): 8.64679 Loss(ef): 0.00467
+
+Total Val loss: 16.76778 | Segmentation BCE Loss: 0.08895 Loss(v): 16.50352 Loss(ef): 0.17531
+
+Epoch 35/49
+--------------------
+[713m 28s] Iteration: 16400 | Train | Segmentation BCE Loss: 0.09196 Loss(v): 8.31791 Loss(ef): 0.00497
+[720m 57s] Iteration: 16600 | Train | Segmentation BCE Loss: 0.09170 Loss(v): 8.28348 Loss(ef): 0.00479
+
+Total Val loss: 16.92211 | Segmentation BCE Loss: 0.09381 Loss(v): 16.62856 Loss(ef): 0.19974
+
+Epoch 36/49
+--------------------
+[731m  4s] Iteration: 16800 | Train | Segmentation BCE Loss: 0.08516 Loss(v): 8.19460 Loss(ef): 0.00466
+[738m 33s] Iteration: 17000 | Train | Segmentation BCE Loss: 0.08861 Loss(v): 8.58070 Loss(ef): 0.00474
+
+Total Val loss: 18.15372 | Segmentation BCE Loss: 0.09536 Loss(v): 17.53347 Loss(ef): 0.52489
+
+Epoch 37/49
+--------------------
+[748m 40s] Iteration: 17200 | Train | Segmentation BCE Loss: 0.08959 Loss(v): 8.84919 Loss(ef): 0.00411
+[756m  9s] Iteration: 17400 | Train | Segmentation BCE Loss: 0.08825 Loss(v): 8.31581 Loss(ef): 0.00414
+[763m 39s] Iteration: 17600 | Train | Segmentation BCE Loss: 0.09088 Loss(v): 9.12630 Loss(ef): 0.00431
+
+Total Val loss: 19.45339 | Segmentation BCE Loss: 0.08835 Loss(v): 18.88392 Loss(ef): 0.48112
+
+Epoch 38/49
+--------------------
+[773m 48s] Iteration: 17800 | Train | Segmentation BCE Loss: 0.08539 Loss(v): 8.51347 Loss(ef): 0.00371
+[781m 18s] Iteration: 18000 | Train | Segmentation BCE Loss: 0.08577 Loss(v): 8.35414 Loss(ef): 0.00391
+
+Total Val loss: 21.59016 | Segmentation BCE Loss: 0.09694 Loss(v): 21.14073 Loss(ef): 0.35249
+
+Epoch 39/49
+--------------------
+[791m 27s] Iteration: 18200 | Train | Segmentation BCE Loss: 0.08517 Loss(v): 7.84702 Loss(ef): 0.00408
+[798m 58s] Iteration: 18400 | Train | Segmentation BCE Loss: 0.08442 Loss(v): 7.94944 Loss(ef): 0.00406
+
+Total Val loss: 17.02701 | Segmentation BCE Loss: 0.09968 Loss(v): 16.78751 Loss(ef): 0.13982
+
+Epoch 40/49
+--------------------
+[809m  6s] Iteration: 18600 | Train | Segmentation BCE Loss: 0.09106 Loss(v): 7.95427 Loss(ef): 0.00553
+[816m 37s] Iteration: 18800 | Train | Segmentation BCE Loss: 0.09028 Loss(v): 7.69955 Loss(ef): 0.00444
+[824m  9s] Iteration: 19000 | Train | Segmentation BCE Loss: 0.08904 Loss(v): 7.78573 Loss(ef): 0.00437
+
+Total Val loss: 16.61220 | Segmentation BCE Loss: 0.08653 Loss(v): 16.12391 Loss(ef): 0.40177
+
+Epoch 41/49
+--------------------
+[834m 27s] Iteration: 19200 | Train | Segmentation BCE Loss: 0.08856 Loss(v): 8.59302 Loss(ef): 0.00460
+[842m 12s] Iteration: 19400 | Train | Segmentation BCE Loss: 0.08814 Loss(v): 8.03968 Loss(ef): 0.00446
+
+Total Val loss: 15.91603 | Segmentation BCE Loss: 0.08036 Loss(v): 15.55215 Loss(ef): 0.28352
+
+Epoch 42/49
+--------------------
+[852m 41s] Iteration: 19600 | Train | Segmentation BCE Loss: 0.08408 Loss(v): 7.58996 Loss(ef): 0.00475
+[860m 18s] Iteration: 19800 | Train | Segmentation BCE Loss: 0.08311 Loss(v): 7.35388 Loss(ef): 0.00447
+
+Total Val loss: 16.32959 | Segmentation BCE Loss: 0.08819 Loss(v): 15.75344 Loss(ef): 0.48796
+
+Epoch 43/49
+--------------------
+[870m 31s] Iteration: 20000 | Train | Segmentation BCE Loss: 0.08283 Loss(v): 7.06463 Loss(ef): 0.00398
+[878m  1s] Iteration: 20200 | Train | Segmentation BCE Loss: 0.08616 Loss(v): 7.23044 Loss(ef): 0.00485
+[885m 40s] Iteration: 20400 | Train | Segmentation BCE Loss: 0.08477 Loss(v): 7.48524 Loss(ef): 0.00460
+
+Total Val loss: 57.36273 | Segmentation BCE Loss: 0.08123 Loss(v): 56.41960 Loss(ef): 0.86190
+
+Epoch 44/49
+--------------------
+[895m 59s] Iteration: 20600 | Train | Segmentation BCE Loss: 0.08577 Loss(v): 7.28445 Loss(ef): 0.00464
+[904m 13s] Iteration: 20800 | Train | Segmentation BCE Loss: 0.08360 Loss(v): 7.34646 Loss(ef): 0.00482
+
+Total Val loss: 19.29850 | Segmentation BCE Loss: 0.08431 Loss(v): 18.91664 Loss(ef): 0.29755
+
+Epoch 45/49
+--------------------
+[914m 56s] Iteration: 21000 | Train | Segmentation BCE Loss: 0.07991 Loss(v): 8.22984 Loss(ef): 0.00500
+[922m 38s] Iteration: 21200 | Train | Segmentation BCE Loss: 0.08369 Loss(v): 7.59173 Loss(ef): 0.00469
+
+Total Val loss: 13.84602 | Segmentation BCE Loss: 0.09211 Loss(v): 13.55794 Loss(ef): 0.19597
+
+Epoch 46/49
+--------------------
+[932m 54s] Iteration: 21400 | Train | Segmentation BCE Loss: 0.09235 Loss(v): 7.92632 Loss(ef): 0.00451
+[940m 55s] Iteration: 21600 | Train | Segmentation BCE Loss: 0.08713 Loss(v): 7.62801 Loss(ef): 0.00444
+[948m 56s] Iteration: 21800 | Train | Segmentation BCE Loss: 0.08652 Loss(v): 7.58653 Loss(ef): 0.00451
+
+Total Val loss: 15.76683 | Segmentation BCE Loss: 0.08479 Loss(v): 15.47798 Loss(ef): 0.20406
+
+Epoch 47/49
+--------------------
+[959m 40s] Iteration: 22000 | Train | Segmentation BCE Loss: 0.08833 Loss(v): 6.94360 Loss(ef): 0.00448
+[967m 30s] Iteration: 22200 | Train | Segmentation BCE Loss: 0.08780 Loss(v): 7.09154 Loss(ef): 0.00447
+
+Total Val loss: 15.96687 | Segmentation BCE Loss: 0.08915 Loss(v): 15.69756 Loss(ef): 0.18016
+
+Epoch 48/49
+--------------------
+[977m 40s] Iteration: 22400 | Train | Segmentation BCE Loss: 0.08436 Loss(v): 6.95987 Loss(ef): 0.00480
+[985m 11s] Iteration: 22600 | Train | Segmentation BCE Loss: 0.08527 Loss(v): 7.15963 Loss(ef): 0.00464
+
+Total Val loss: 15.08923 | Segmentation BCE Loss: 0.07796 Loss(v): 14.61485 Loss(ef): 0.39643
+
+Epoch 49/49
+--------------------
+[995m 28s] Iteration: 22800 | Train | Segmentation BCE Loss: 0.08447 Loss(v): 6.80627 Loss(ef): 0.00462
+[1003m 40s] Iteration: 23000 | Train | Segmentation BCE Loss: 0.08694 Loss(v): 6.93070 Loss(ef): 0.00465
+[1012m  5s] Iteration: 23200 | Train | Segmentation BCE Loss: 0.08622 Loss(v): 6.79910 Loss(ef): 0.00477
+
+Total Val loss: 15.76471 | Segmentation BCE Loss: 0.08762 Loss(v): 15.38084 Loss(ef): 0.29626
+
+Training complete in 1014m 59s
+Best validation loss: 13.84602
+(Seg.: 0.09211 | v: 13.55794 | ef: 0.19597)

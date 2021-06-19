@@ -51,13 +51,21 @@ model = EchoNet(device)
 model = model.to("cuda")
 
 # Metric
-criterion_bce = nn.BCEWithLogitsLoss()
-criterion_mse = nn.MSELoss()
+criterion_bce = nn.BCELoss()
+criterion_smoothl1 = nn.SmoothL1Loss()
 
 # Optimization Setting
-optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
+optimizer0 = optim.SGD(model.unet.paraemters(), lr=lr, momentum=0.9, weight_decay=1e-4)
+optimizer1 = optim.SGD(
+    list(model.encoder.parameters()) + list(model.regressor.parameters()),
+    lr=lr,
+    momentum=0.9,
+    weight_decay=1e-4,
+)
+optimizer2 = optim.SGD(
+    model.decoder.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4
+)
 
-scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
 
 best_val_loss = torch.finfo(torch.float32).max
 best_loss_seg = torch.finfo(torch.float32).max
@@ -83,38 +91,50 @@ for epoch in range(num_epochs):
             model.eval()
             print()
 
-        for inputs, labels, masks in dataloaders[phase]:
+        for inputs, labels, masks, contains_edv_esv_idxes in dataloaders[phase]:
             video_tensor = inputs[0].to(device)
             input_frames = torch.cat(inputs[1:]).to(device)
             volumes = torch.cat(labels[1:]).unsqueeze(1).float().to(device)
             masks = torch.cat(masks).float().to(device)
-            # efs = labels[0].unsqueeze(1).float().to(device) # Omit gt ef
+            efs = labels[0].unsqueeze(1).float().to(device)  # Omit gt ef
 
             if phase == "train":
                 iterations += 1
                 within_epoch_interations += 1
 
-            optimizer.zero_grad()
+            optimizer0.zero_grad()
+            optimizer1.zero_grad()
+            optimizer2.zero_grad()
             with torch.set_grad_enabled(phase == "train"):
+                masks_pred = model(input_frames, goal="mask")
+                efs_pred = model(video_tensor, goal="ef")
 
-                if phase == 'train':
-                    masks_pred, volumes_pred = model(input_frames, goal="mask&volume", tf_masks=masks)
-                else:
-                    masks_pred, volumes_pred = model(input_frames, goal="mask&volume")
                 # Compute losses
                 loss_seg = criterion_bce(masks_pred, masks)
-                loss_volume = criterion_mse(volumes_pred, volumes)
-
-                efs_pred = model(video_tensor, goal="ef")
-                efs = model.regressor(model.embed(x)) # Weekly supervision of ef
-                loss_ef = criterion_mse(efs_pred, efs)
-
-                loss_mse = loss_volume + loss_ef
-
                 if phase == "train":
                     loss_seg.backward(retain_graph=True)
-                    loss_mse.backward()
-                    optimizer.step()
+                    optimizer0.step()
+
+                volumes_pred = model(input_frames, goal="volume")
+                loss_volume = criterion_smoothl1(volumes_pred, volumes)
+                if phase == "train":
+                    loss_volume.backward()
+                    model.unet.zero_grad()
+                    optimizer1.step()
+
+                pseudo_efs = model._get_pseudo_ef(
+                    video_tensor
+                )  # Weekly supervision of ef
+
+                if phase == "train":
+                    gt_ef_idx = torch.where(contains_edv_esv_idxes == True)
+                    pseudo_efs[gt_ef_idx] = ef[gt_ef_idx]
+
+                loss_ef = criterion_smoothl1(efs_pred, pseudo_efs)
+
+                if phase == "train":
+                    loss_ef.backward()
+                    optimizer2.step()
 
             running_loss_seg += loss_seg.item() * 2 * batch_size
             running_loss_volume += loss_volume.item() * 2 * batch_size
@@ -128,8 +148,8 @@ for epoch in range(num_epochs):
                         f"Iteration: {iterations:>4.0f} | "
                         f"{phase.title()} | "
                         f"Segmentation BCE Loss: {running_loss_seg/(within_epoch_interations * 2 * batch_size):.5f} "
-                        f"MSE Loss(v): {running_loss_volume/(within_epoch_interations * 2 * batch_size):.5f} "
-                        f"MSE Loss(ef): {running_loss_ef/(within_epoch_interations * batch_size):.5f}"
+                        f"Loss(v): {running_loss_volume/(within_epoch_interations * 2 * batch_size):.5f} "
+                        f"Loss(ef): {running_loss_ef/(within_epoch_interations * batch_size):.5f}"
                     )
                 )
 
@@ -143,19 +163,16 @@ for epoch in range(num_epochs):
                 (
                     f"Total {phase.title()} loss: {val_loss:.5f} | "
                     f"Segmentation BCE Loss: {running_loss_seg/(N_val * 2):.5f} "
-                    f"MSE Loss(v): {running_loss_volume/(N_val * 2):.5f} "
-                    f"MSE Loss(ef): {running_loss_ef/(N_val):.5f}"
+                    f"Loss(v): {running_loss_volume/(N_val * 2):.5f} "
+                    f"Loss(ef): {running_loss_ef/(N_val):.5f}"
                 )
             )
             if val_loss < best_val_loss:
-                torch.save(model.state_dict(), "checkpoints/best.pt")
+                torch.save(model.state_dict(), "checkpoints/echonet.pt")
                 best_val_loss = val_loss
                 best_loss_seg = running_loss_seg / (N_val * 2)
                 best_loss_volume = running_loss_volume / (N_val * 2)
                 best_loss_ef = running_loss_ef / (N_val)
-
-        else:
-            scheduler.step()
 
     print()
 time_elapsed = time.time() - since
@@ -163,6 +180,6 @@ print(f"Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s"
 print(
     (
         f"Best validation loss: {best_val_loss:.5f}\n"
-        f"(Seg.: {best_loss_seg:.5f} | MSE(v): {best_loss_volume:.5f} | MSE(ef): {best_loss_ef:.5f}"
+        f"(Seg.: {best_loss_seg:.5f} | v: {best_loss_volume:.5f} | ef: {best_loss_ef:.5f})"
     )
 )

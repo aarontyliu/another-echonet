@@ -101,6 +101,10 @@ class EchoNetDataset(Dataset):
         s = np.random.choice(self.df.NumberOfFrames.iloc[idx] - self.min_num_frames)
         sampled_index = list(range(s, s + self.min_num_frames, 4))
 
+        contains_edv_esv_idxes = (frame_idx_esv in sampled_index) and (
+            frame_idx_edv in sampled_index
+        )
+
         video = read_video(video_path, pts_unit="sec")[0]
         video = video.permute(0, 3, 1, 2) / 255.0
 
@@ -119,6 +123,7 @@ class EchoNetDataset(Dataset):
             (video_tensor, edv_frame, esv_frame),
             (ef, edv, esv),
             (edv_mask, esv_mask),
+            contains_edv_esv_idxes,
         )
 
     def get_mask(self, x1, y1, x2, y2):
