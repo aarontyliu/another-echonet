@@ -51,13 +51,14 @@ model = EchoNet(device)
 model = model.to("cuda")
 
 # Metric
-criterion_bce = nn.BCELoss()
+criterion_bce = nn.BCEWithLogitsLoss()
 criterion_smoothl1 = nn.SmoothL1Loss()
 
 # Optimization Setting
-optimizer0 = optim.SGD(model.unet.paraemters(), lr=lr, momentum=0.9, weight_decay=1e-4)
 optimizer1 = optim.SGD(
-    list(model.encoder.parameters()) + list(model.regressor.parameters()),
+    list(model.unet.parameters())
+    + list(model.encoder.parameters())
+    + list(model.regressor.parameters()),
     lr=lr,
     momentum=0.9,
     weight_decay=1e-4,
@@ -96,41 +97,30 @@ for epoch in range(num_epochs):
             input_frames = torch.cat(inputs[1:]).to(device)
             volumes = torch.cat(labels[1:]).unsqueeze(1).float().to(device)
             masks = torch.cat(masks).float().to(device)
-            efs = labels[0].unsqueeze(1).float().to(device)  # Omit gt ef
+            # efs = labels[0].unsqueeze(1).float().to(device) # Omit gt ef
 
             if phase == "train":
                 iterations += 1
                 within_epoch_interations += 1
 
-            optimizer0.zero_grad()
             optimizer1.zero_grad()
             optimizer2.zero_grad()
             with torch.set_grad_enabled(phase == "train"):
-                masks_pred = model(input_frames, goal="mask")
-                efs_pred = model(video_tensor, goal="ef")
 
+                masks_pred, volumes_pred = model(input_frames, goal="mask&volume")
+                efs_pred = model(video_tensor, goal="ef")
                 # Compute losses
                 loss_seg = criterion_bce(masks_pred, masks)
+                loss_volume = criterion_smoothl1(volumes_pred, volumes)
+
                 if phase == "train":
                     loss_seg.backward(retain_graph=True)
-                    optimizer0.step()
-
-                volumes_pred = model(input_frames, goal="volume")
-                loss_volume = criterion_smoothl1(volumes_pred, volumes)
-                if phase == "train":
                     loss_volume.backward()
-                    model.unet.zero_grad()
                     optimizer1.step()
+                    optimizer1.zero_grad()
 
-                pseudo_efs = model._get_pseudo_ef(
-                    video_tensor
-                )  # Weekly supervision of ef
-
-                if phase == "train":
-                    gt_ef_idx = torch.where(contains_edv_esv_idxes == True)
-                    pseudo_efs[gt_ef_idx] = ef[gt_ef_idx]
-
-                loss_ef = criterion_smoothl1(efs_pred, pseudo_efs)
+                efs = model._get_pseudo_ef(video_tensor)  # Weekly supervision of ef
+                loss_ef = criterion_smoothl1(efs_pred, efs)
 
                 if phase == "train":
                     loss_ef.backward()
@@ -168,7 +158,7 @@ for epoch in range(num_epochs):
                 )
             )
             if val_loss < best_val_loss:
-                torch.save(model.state_dict(), "checkpoints/echonet.pt")
+                torch.save(model.state_dict(), "checkpoints/best.pt")
                 best_val_loss = val_loss
                 best_loss_seg = running_loss_seg / (N_val * 2)
                 best_loss_volume = running_loss_volume / (N_val * 2)

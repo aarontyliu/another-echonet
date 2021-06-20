@@ -45,35 +45,29 @@ class EchoNet(nn.Module):
         self.decoder = LSTMDecoder(
             input_dim=resnet18.fc.in_features,
             hidden_dim=256,
-            num_layers=3,
+            num_layers=2,
             num_outputs=1,
             bidirectional=True,
             dropout_p=0.3,
         )
 
-    def forward(self, x, goal="volume"):
+    def forward(self, x, goal="mask&volume"):
         assert goal in (
-            "volume",
-            "mask",
+            "mask&volume",
             "ef",
-        ), "Please verify the goal ('volume' / 'mask' / 'ef')!"
+        ), "Please verify the task ('mask&volume' / 'ef')!"
 
-        if goal == "volume":
+        if goal == "mask&volume":
             assert x.dim() == 4, "Input needs to be (N x C x H x W)!"
-            x = self.unet(x)
-            x = self.encoder(x)
+            masks = self.unet(x)
+            x = self.encoder(masks)
             x = self.regressor(x)
 
-            return x
-
-        elif goal == "mask":
-            assert x.dim() == 4, "Input needs to be (N x C x H x W)!"
-            x = self.unet(x)
-
-            return x
+            return masks, x
 
         elif goal == "ef":
             assert x.dim() == 5, "Input needs to be (L x N x C x H x W)!"
+
             x = self.embed(x)
             x = self.decoder(x)
 
@@ -99,13 +93,9 @@ class EchoNet(nn.Module):
             vs = torch.stack(
                 [self.regressor(k) for k in self.embed(x).permute(1, 0, 2)]
             ).squeeze(2)
-            return 100.0 * (
-                (vs.max(dim=1)[0] - vs.min(dim=1)[0]) / vs.max(dim=1)[0]
-            ).unsqueeze(1)
-
-    def predict_mask(self, x, threshold=0.5):
-        with torch.no_grad():
-            return (self.unet(x) > threshold).float()
+            return ((vs.max(dim=1)[0] - vs.min(dim=1)[0]) / vs.max(dim=1)[0]).unsqueeze(
+                1
+            )
 
 
 class LSTMDecoder(nn.Module):
@@ -136,8 +126,6 @@ class LSTMDecoder(nn.Module):
         self.bn1 = nn.BatchNorm1d(self.hidden_dim)
         self.dropout = nn.Dropout(self.dropout_p)
         self.fc2 = nn.Linear(self.hidden_dim, self.num_outputs)
-        self.sigmoid = nn.Sigmoid()
-        self.scale = 100.0
 
     def forward(self, x):
         x, _ = self.lstm(x)
@@ -146,7 +134,46 @@ class LSTMDecoder(nn.Module):
         x = F.relu(self.bn1(self.fc1(x)))
         x = self.dropout(x)
         x = self.fc2(x)
-        x = self.sigmoid(x)
-        x = self.scale * x
 
         return x
+
+
+# class PositionalEncoding(nn.Module):
+#     def __init__(self, d_model, dropout=0.1, max_len=64):
+#         super(PositionalEncoding, self).__init__()
+#         self.dropout = nn.Dropout(p=dropout)
+
+#         pe = torch.zeros(max_len, d_model)
+#         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+#         div_term = torch.exp(
+#             torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
+#         )
+#         pe[:, 0::2] = torch.sin(position * div_term)
+#         pe[:, 1::2] = torch.cos(position * div_term)
+#         pe = pe.unsqueeze(0).transpose(0, 1)
+#         self.register_buffer("pe", pe)
+
+#     def forward(self, x):
+#         x = x + self.pe[: x.size(0), :]
+
+#         return self.dropout(x)
+
+
+# class TransformerDecoder(nn.Module):
+#     def __init__(self, d_model=256, num_outputs=2, nlayers=3, dropout=0.3, nhead=8):
+#         super(TransformerDecoder, self).__init__()
+#         self.nhead = nhead
+#         self.pos_encoder = PositionalEncoding(d_model, dropout)
+#         decoder_layer = nn.TransformerDecoderLayer(d_model, nhead=nhead)
+#         self.transformer_decoder = nn.TransformerDecoder(
+#             decoder_layer, num_layers=nlayers
+#         )
+#         self.linear = nn.Linear(d_model, num_outputs)
+
+#     def forward(self, x):
+#         x_ = self.pos_encoder(x)
+#         output = self.transformer_decoder(x_, x)
+#         output = output.permute(1, 0, 2)[:, -1, :]
+#         output = self.linear(output)
+
+#         return output
