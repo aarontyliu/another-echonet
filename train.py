@@ -1,3 +1,4 @@
+import os
 import time
 
 import torch
@@ -12,6 +13,8 @@ from models import EchoNet
 
 video_dir = "/home/tienyu/data/EchoNet-Dynamic/Videos"
 target_csv = "/home/tienyu/data/EchoNet-Dynamic/FileList.csv"
+checkpoint_dir = 'checkpoints'
+os.makedirs(checkpoint_dir, exist_ok=True)
 
 batch_size = 16
 num_epochs = 50
