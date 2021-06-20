@@ -119,7 +119,7 @@ for epoch in range(num_epochs):
                     optimizer1.step()
                     optimizer1.zero_grad()
 
-                efs = model._get_pseudo_ef(video_tensor)  # Weekly supervision of ef
+                efs = model._get_pseudo_ef(video_tensor)  # Weekly supervision of EF
                 loss_ef = criterion_smoothl1(efs_pred, efs)
 
                 if phase == "train":
@@ -158,7 +158,7 @@ for epoch in range(num_epochs):
                 )
             )
             if val_loss < best_val_loss:
-                torch.save(model.state_dict(), "checkpoints/best.pt")
+                torch.save(model.state_dict(), "checkpoints/echonet.pt")
                 best_val_loss = val_loss
                 best_loss_seg = running_loss_seg / (N_val * 2)
                 best_loss_volume = running_loss_volume / (N_val * 2)

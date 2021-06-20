@@ -93,9 +93,9 @@ class EchoNet(nn.Module):
             vs = torch.stack(
                 [self.regressor(k) for k in self.embed(x).permute(1, 0, 2)]
             ).squeeze(2)
-            return ((vs.max(dim=1)[0] - vs.min(dim=1)[0]) / vs.max(dim=1)[0]).unsqueeze(
-                1
-            )
+            return 100.0 * (
+                (vs.max(dim=1)[0] - vs.min(dim=1)[0]) / vs.max(dim=1)[0]
+            ).unsqueeze(1)
 
 
 class LSTMDecoder(nn.Module):
@@ -136,44 +136,3 @@ class LSTMDecoder(nn.Module):
         x = self.fc2(x)
 
         return x
-
-
-# class PositionalEncoding(nn.Module):
-#     def __init__(self, d_model, dropout=0.1, max_len=64):
-#         super(PositionalEncoding, self).__init__()
-#         self.dropout = nn.Dropout(p=dropout)
-
-#         pe = torch.zeros(max_len, d_model)
-#         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-#         div_term = torch.exp(
-#             torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
-#         )
-#         pe[:, 0::2] = torch.sin(position * div_term)
-#         pe[:, 1::2] = torch.cos(position * div_term)
-#         pe = pe.unsqueeze(0).transpose(0, 1)
-#         self.register_buffer("pe", pe)
-
-#     def forward(self, x):
-#         x = x + self.pe[: x.size(0), :]
-
-#         return self.dropout(x)
-
-
-# class TransformerDecoder(nn.Module):
-#     def __init__(self, d_model=256, num_outputs=2, nlayers=3, dropout=0.3, nhead=8):
-#         super(TransformerDecoder, self).__init__()
-#         self.nhead = nhead
-#         self.pos_encoder = PositionalEncoding(d_model, dropout)
-#         decoder_layer = nn.TransformerDecoderLayer(d_model, nhead=nhead)
-#         self.transformer_decoder = nn.TransformerDecoder(
-#             decoder_layer, num_layers=nlayers
-#         )
-#         self.linear = nn.Linear(d_model, num_outputs)
-
-#     def forward(self, x):
-#         x_ = self.pos_encoder(x)
-#         output = self.transformer_decoder(x_, x)
-#         output = output.permute(1, 0, 2)[:, -1, :]
-#         output = self.linear(output)
-
-#         return output

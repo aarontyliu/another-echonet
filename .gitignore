@@ -129,5 +129,8 @@ dmypy.json
 .pyre/
 
 
-#checkpoints 
+# checkpoints 
 checkpoints/
+
+# output 
+output/*.avi
