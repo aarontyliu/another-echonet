@@ -161,7 +161,7 @@ for epoch in range(num_epochs):
                 )
             )
             if val_loss < best_val_loss:
-                torch.save(model.state_dict(), "checkpoints/echonet.pt")
+                torch.save(model.state_dict(), "checkpoints/echonetv2.pt")
                 best_val_loss = val_loss
                 best_loss_seg = running_loss_seg / (N_val * 2)
                 best_loss_volume = running_loss_volume / (N_val * 2)

@@ -78,3 +78,11 @@ def write_video(
     g.msgbox(
         f"Completed! Output video is saved to {os.path.join(output_dir, file_name)}"
     )
+
+
+def replace_activation_in_model(model, prev, new):
+    for n, module in model.named_children():
+        if len(list(module.children())) > 0:
+            replace_activation_in_model(module, prev, new)
+        if isinstance(module, prev):
+            setattr(model, n, new)

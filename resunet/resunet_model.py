@@ -43,6 +43,7 @@ class ResUNet(nn.Module):
         self.shortcut7 = nn.Conv2d(128, 64, kernel_size=1)
 
         self.outconv = nn.Conv2d(64, n_classes, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         # Encoding
@@ -64,5 +65,6 @@ class ResUNet(nn.Module):
         x_cat = self.up3(x6 + self.shortcut6(x_cat), x2_in)
         x7 = self.level7(x_cat)
         x = self.outconv(x7 + self.shortcut7(x_cat))
+        x = self.sigmoid(x)
 
         return x
