@@ -8,6 +8,6 @@ More information will be added.
 
 Sample testing output:
 
-Input                             |  Model output
+Input video                       |  Model output
 :--------------------------------:|:----------------------------------------:
 ![](pics/0X347C08CBDD9C7630.gif)  |  ![](pics/output-0X347C08CBDD9C7630.gif)
