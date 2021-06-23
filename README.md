@@ -31,11 +31,11 @@ The blue area is the mask produced by UNet, and the green line denotes the volum
 
 
 ### Future plans
-- Replace UNet with Residual UNet to aim for better segmentation performance and consider using region-based loss (eg. Dice) instead of distribution-based losses
+- Replace UNet with Residual UNet (implemented and tested) to aim for better segmentation performance and consider using region-based loss (eg. Dice)
 - Adopt other encoder families (eg. EfficientNet family) to better volume prediction
-- Replace LSTM with Transformers?
-- Apply early-regularization in segmentation network to resolve noisy label problem
-- Denoising with clustering results on volume/segmentation estimates
+- Replace LSTM with Transformers
+- Apply early-regularization in segmentation network to resolve noisy label issue
+- Denoise with clustering results on volume/segmentation estimates
 - Perform deep compression to reduce model size and increase inference speed 
 - Learn general representation of echocardiogram video for downstream tasks
 
