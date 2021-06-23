@@ -21,7 +21,7 @@ Sample testing output:
 
 Input video                       |  Model output
 :--------------------------------:|:----------------------------------------:
-![](pics/0X347C08CBDD9C7630.gif)  |  ![](pics/output-0X347C08CBDD9C7630.gif)
+![](pics/0X347C08CBDD9C7630.gif=250x250)  |  ![](pics/output-0X347C08CBDD9C7630.gif=250x250)
 
 The blue area is the mask produced by UNet, and the green line denotes the volume predicted by ResNet-18.
 
