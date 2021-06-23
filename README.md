@@ -8,7 +8,7 @@ To train a model, one can run the follow script. There are arguments that can be
 
 Example training command:
 ```python
-python train.py --lr1 1e-5 --lr2 1e-4 --batch_size 16 --use_gt_ef --log_every 200 --device 'cuda' --load 'foo.pt'
+python train.py --lr1 1e-5 --lr2 1e-4 --batch_size 16 --epochs 40 --use_gt_ef --log_every 200 --device 'cuda' --load 'foo.pt'
 ```
 
 To perform instance-level inference, run the following code (paths need to be handled in current design):
