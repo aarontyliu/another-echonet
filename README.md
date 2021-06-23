@@ -17,7 +17,7 @@ python inference.py
 ```
 
 
-Sample testing output:
+## Sample testing output:
 
 Input video                       |  Model output
 :--------------------------------:|:----------------------------------------:
@@ -26,11 +26,11 @@ Input video                       |  Model output
 The blue area is the mask produced by UNet, and the green line denotes the volume predicted by ResNet-18.
 
 
-### Design flow:
+## Design flow:
 ![](pics/workflow.gif)
 
 
-### Future plans
+## Future plans
 - Replace UNet with Residual UNet (implemented and tested) to aim for better segmentation performance and consider using region-based loss (eg. Dice)
 - Adopt other encoder families (eg. EfficientNet family) to better volume prediction
 - Replace LSTM with Transformers
