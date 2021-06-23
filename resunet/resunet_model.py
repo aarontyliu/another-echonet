@@ -1,5 +1,9 @@
-# Reference: https://github.com/milesial/Pytorch-UNet
-""" Full assembly of the parts to form the complete network """
+"""
+   Author: Aaron Liu
+   Email: tl254@duke.edu
+   Created on: June 16 2021
+   Code structure reference: https://github.com/milesial/Pytorch-UNet
+"""
 
 import torch.nn as nn
 import torch.nn.functional as F

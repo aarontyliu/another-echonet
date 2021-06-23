@@ -1,3 +1,10 @@
+"""
+   Author: Aaron Liu
+   Email: tl254@duke.edu
+   Created on: June 16 2021
+   Code structure reference: https://github.com/milesial/Pytorch-UNet
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

@@ -1,16 +1,21 @@
+#!/usr/bin/env python
+"""Data module to load EchoNet-Dynamic (https://echonet.github.io/dynamic/) database
+   Author: Aaron Liu
+   Email: tl254@duke.edu
+   Created on: June 16 2021
+"""
 import os
 from collections import defaultdict
 
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn.functional as F
 import torchvision.transforms as transforms
 from skimage.draw import polygon
 from torch.utils.data import Dataset
 from torchvision.io import read_video
 from tqdm import tqdm
-import torch.nn.functional as F
-
 
 IMG_SIZE = 112
 
@@ -140,7 +145,7 @@ class EchoNetDataset(Dataset):
             frame_idx_edv in sampled_index
         )
 
-        # Read video and convert it from uint8 to float[0,1]
+        # Read video and convert it from uint8[0,255] to float[0,1]
         video = read_video(video_path, pts_unit="sec")[0]
         video = video.permute(0, 3, 1, 2) / 255.0
 

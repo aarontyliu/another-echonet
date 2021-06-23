@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+"""Simple UI to test the trained model on videos / or sampled test videos
+   Author: Aaron Liu
+   Email: tl254@duke.edu
+   Created on: June 16 2021
+"""
+
 import os
 import time
 
@@ -7,11 +14,15 @@ import pandas as pd
 import torch
 
 from models import EchoNet
-from utils import (get_masked_video_tensor, grayscale_tensor,
-                   video_2_masks_and_volumes, write_video)
+from utils import (
+    get_masked_video_tensor,
+    grayscale_tensor,
+    video_2_masks_and_volumes,
+    write_video,
+)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-checkpoint_dir = "checkpoints/echonet.pt"
+checkpoint_dir = "checkpoints/baseline.pt"
 output_dir = "output"
 os.makedirs(output_dir, exist_ok=True)
 
@@ -27,6 +38,7 @@ model.load_state_dict(torch.load(checkpoint_dir))
 
 
 def generate_video(filename, clip_path, model, fps, ekg=True, device=device):
+    """Generate output video"""
     since = time.time()
     grayscale_clip = grayscale_tensor(clip_path)
     grayscale_clip = grayscale_clip.to(device)
@@ -39,6 +51,7 @@ def generate_video(filename, clip_path, model, fps, ekg=True, device=device):
 
 
 def filename_handler(filename, from_dir=False):
+    """Simple UI to play around the trained model"""
     bye = f"You didn't select a file :( Bye bye."
     if from_dir:
         if filename is not None:
