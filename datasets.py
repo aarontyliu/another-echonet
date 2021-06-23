@@ -18,6 +18,7 @@ class EchoNetDataset(Dataset):
         self,
         target_csv,
         video_dir,
+        tracing_dir="/home/tienyu/data/EchoNet-Dynamic/VolumeTracings.csv",
         split="train",
         transform=None,
         sampling_frequency=4,
@@ -36,7 +37,7 @@ class EchoNetDataset(Dataset):
             "test",
         ), "Please validate the split specification (train, val or test)"
         self.tracing = pd.read_csv(
-            "/home/tienyu/data/EchoNet-Dynamic/VolumeTracings.csv"
+            tracing_dir
         )
         valid_clips = self.tracing.FileName.str.replace(".avi", "").unique()
 
