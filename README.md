@@ -24,3 +24,18 @@ Input video                       |  Model output
 ![](pics/0X347C08CBDD9C7630.gif)  |  ![](pics/output-0X347C08CBDD9C7630.gif)
 
 The blue area is the mask produced by UNet, and the green line denotes the volume predicted by ResNet-18.
+
+
+### Design flow:
+![](pics/workflow.gif)
+
+
+### Future plans
+- Replace UNet with Residual UNet to aim for better segmentation performance and consider using region-based loss (eg. Dice) instead of distribution-based losses
+- Adopt other encoder families (eg. EfficientNet family) to better volume prediction
+- Replace LSTM with Transformers?
+- Apply early-regularization in segmentation network to resolve noisy label problem
+- Denoising with clustering results on volume/segmentation estimates
+- Perform deep compression to reduce model size and increase inference speed 
+- Learn general representation of echocardiogram video for downstream tasks
+
