@@ -1,4 +1,4 @@
-# Precision-Medical-Diagnosis
+# Precision-Medicine-EchoNet
 
 Details to be added.
 
