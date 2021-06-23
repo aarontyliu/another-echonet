@@ -6,4 +6,4 @@ This repo provides scripts to load the EchoNet-Dynamic database (https://echonet
 
 
 
-{google_docs}https://docs.google.com/presentation/d/1yLzdN2LniencLOXI_MaOgFNkJItoJg97cSQy_uE_idQ/edit#slide=id.ge107a48549_0_16{google_docs}
+{google_docs}https://docs.google.com/presentation/d/1yLzdN2LniencLOXI_MaOgFNkJItoJg97cSQy_uE_idQ/edit#slide=id.ge107a48549_0_16{/google_docs}
