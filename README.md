@@ -5,4 +5,6 @@ This repo provides scripts to load the EchoNet-Dynamic database (https://echonet
 
 More information will be added.
 
-![](pics/output-0X347C08CBDD9C7630.gif)
+Input             |  Model output
+:-------------------------:|:-------------------------:
+![](pics/0X347C08CBDD9C7630.gif)  |  ![](pics/output-0X347C08CBDD9C7630.gif)
