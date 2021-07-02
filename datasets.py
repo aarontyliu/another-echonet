@@ -59,7 +59,7 @@ class EchoNetDataset(Dataset):
         self.tracing = pd.read_csv(os.path.join(self.root_dir, "VolumeTracings.csv"))
 
         # Remove clip that has no annotation in the volume tracing file
-        valid_clips = self.tracing.FileName.str.replace(".avi", "").unique()
+        valid_clips = self.tracing.FileName.str.replace(".avi", "", regex=False).unique()
         valid_idx = np.isin(self.filelist.FileName, valid_clips)
         self.filelist = self.filelist[valid_idx]
         # Remove clip that has too few frames for temporal sub-sampling

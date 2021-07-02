@@ -7,20 +7,20 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .cspresxunet_parts import LevelBlock, UpSamplingConcatenate
+from .mobileresunet_parts import LevelBlock, UpSamplingConcatenate
 
-class CSPResXUNet(nn.Module):
+class MobileResUNet(nn.Module):
     def __init__(self, n_channels, n_classes):
-        super(CSPResXUNet, self).__init__()
+        super(MobileResUNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
 
         # Encoding
         self.level1 = nn.Sequential(
-            nn.Conv2d(n_channels, 64, kernel_size=3, padding=1),
+            nn.Conv2d(n_channels, 64, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.Conv2d(64, 64, kernel_size=1, bias=False),
         )
         self.level2 = LevelBlock(64, 128, stride=(2, 1))
         self.level3 = LevelBlock(128, 256, stride=(2, 1))
@@ -63,6 +63,8 @@ class CSPResXUNet(nn.Module):
         x_cat = self.up3(x6 + self.shortcut6(x_cat), x2_in)
         x7 = self.level7(x_cat)
         x = self.outconv(x7 + self.shortcut7(x_cat))
+        
+        # Sigmoid
         x = self.sigmoid(x)
 
         return x
