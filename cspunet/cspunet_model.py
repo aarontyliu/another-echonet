@@ -10,6 +10,7 @@ import torch.nn.functional as F
 from .cspunet_parts import MBConv, TransposeMBConv, UpSamplingConcatenate
 
 
+
 class CSPUNet(nn.Module):
     def __init__(self, n_channels, n_classes):
         super(CSPUNet, self).__init__()
@@ -18,11 +19,11 @@ class CSPUNet(nn.Module):
 
         # Encoding
         self.conv1 = nn.Sequential(
-            nn.Conv2d(n_channels, 32, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(32),
+            nn.Conv2d(n_channels, 16, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
         )
-        self.down1 = MBConv(32, 16, t=1, kernel_size=3, stride=1)
+        self.down1 = MBConv(16, 16, t=1, kernel_size=3, stride=1)
         self.down2 = nn.Sequential(
             MBConv(16, 24, t=6, kernel_size=3, stride=2),
             MBConv(24, 24, t=6, kernel_size=3, stride=1),
@@ -97,13 +98,15 @@ class CSPUNet(nn.Module):
                 MBConv(16, 16, t=6, kernel_size=3, stride=1),
             ),
         )
-        self.up7 = TransposeMBConv(16, 32, stride=2, kernel_size=2)
+        self.up7 = TransposeMBConv(16, 16, stride=2, kernel_size=2)
+        
+
+        # Final
         self.outconv = nn.Sequential(
             nn.ReLU(inplace=True),
-            nn.Conv2d(32, n_classes, kernel_size=3, padding=1),
+            nn.Dropout(0.001),
+            nn.Conv2d(16, n_classes, kernel_size=3, padding=1),
         )
-
-        # Sigmoid
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):

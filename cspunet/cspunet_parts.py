@@ -18,8 +18,10 @@ class MBConv(nn.Module):
         t=1,
         kernel_size=3,
         stride=1,
+        se=True
     ):
         super().__init__()
+        self.se = se
         self.t = t
         self.in_channels = in_channels
         self.mid_channels = self.in_channels * self.t
@@ -58,16 +60,29 @@ class MBConv(nn.Module):
             bias=False,
         )
         self.bn3 = nn.BatchNorm2d(self.out_channels - self.half)
+        if self.se:
+            se_ratio = 0.25
+            squeezed_channels = int((self.mid_channels - self.half) * se_ratio)
+            self.reduce = nn.Conv2d(in_channels=self.mid_channels - self.half, out_channels=squeezed_channels, kernel_size=1)
+            self.expand = nn.Conv2d(in_channels=squeezed_channels, out_channels=self.mid_channels - self.half, kernel_size=1)
 
     def forward(self, x):
 
         part1, part2 = x[:, : self.half], x[:, self.half :]
         out = self.activation(self.bn1(self.expansion(part2)))
         out = self.activation(self.bn2(self.dwise(out)))
+
+        # squeeze and excitation block
+        if self.se:
+            out_squeezed = F.adaptive_avg_pool2d(out, 1)
+            out_squeezed = F.relu(self.reduce(out_squeezed))
+            out_squeezed = self.expand(out_squeezed)
+            out = torch.sigmoid(out_squeezed) * out
+
         out = self.bn3(self.projection(out))
 
         if self.skip_connection:
-            out = torch.cat([out, part1], dim=1)
+            out = torch.cat([out + part2, part1], dim=1)
         return out
 
 
@@ -79,8 +94,10 @@ class TransposeMBConv(nn.Module):
         t=1,
         kernel_size=3,
         stride=1,
+        se=True
     ):
         super().__init__()
+        self.se = se
         self.t = t
         self.in_channels = in_channels
         self.mid_channels = self.in_channels * self.t
@@ -118,16 +135,28 @@ class TransposeMBConv(nn.Module):
             bias=False,
         )
         self.bn3 = nn.BatchNorm2d(self.out_channels)
+        if self.se:
+            se_ratio = 0.25
+            squeezed_channels = int((self.mid_channels - self.half) * se_ratio)
+            self.reduce = nn.Conv2d(in_channels=self.mid_channels - self.half, out_channels=squeezed_channels, kernel_size=1)
+            self.expand = nn.Conv2d(in_channels=squeezed_channels, out_channels=self.mid_channels - self.half, kernel_size=1)
 
     def forward(self, x):
-
         part1, part2 = x[:, : self.half], x[:, self.half :]
         out = self.activation(self.bn1(self.expansion(part2)))
         out = self.activation(self.bn2(self.dwise(out)))
+        
+        # squeeze and excitation block
+        if self.se:
+            out_squeezed = F.adaptive_avg_pool2d(out, 1)
+            out_squeezed = F.relu(self.reduce(out_squeezed))
+            out_squeezed = self.expand(out_squeezed)
+            out = torch.sigmoid(out_squeezed) * out
+
         out = self.bn3(self.projection(out))
 
         if self.skip_connection:
-            out = torch.cat([out, part1], dim=1)
+            out = torch.cat([out + part2, part1], dim=1)
         return out
 
 
