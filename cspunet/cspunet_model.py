@@ -18,119 +18,57 @@ class CSPUNet(nn.Module):
         self.n_classes = n_classes
 
         # Encoding
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(n_channels, 16, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(16),
+        self.stem = nn.Sequential(
+            nn.Conv2d(n_channels, 24, kernel_size=3, padding=1, bias=False, stride=2),
+            nn.BatchNorm2d(24),
             nn.ReLU(inplace=True),
         )
-        self.down1 = MBConv(16, 16, t=1, kernel_size=3, stride=1)
+        self.down1 = nn.Sequential(*(2 * [FusedMBConv(24, 24, stride=1)]))
         self.down2 = nn.Sequential(
-            MBConv(16, 24, t=6, kernel_size=3, stride=2),
-            MBConv(24, 24, t=6, kernel_size=3, stride=1),
+            *(3 * [FusedMBConv(24, 24)] + [FusedMBConv(24, 48, stride=2)])
         )
         self.down3 = nn.Sequential(
-            MBConv(24, 40, t=6, kernel_size=5, stride=2),
-            MBConv(40, 40, t=6, kernel_size=5, stride=1),
+            *(3 * [FusedMBConv(48, 48)] + [FusedMBConv(48, 64, stride=2)])
         )
         self.down4 = nn.Sequential(
-            MBConv(40, 80, t=6, kernel_size=3, stride=2),
-            MBConv(80, 80, t=6, kernel_size=3, stride=1),
-            MBConv(80, 80, t=6, kernel_size=3, stride=1),
+            *(5 * [MBConv(64, 64, t=4)] + [MBConv(64, 128, stride=2, t=4)])
         )
         self.down5 = nn.Sequential(
-            MBConv(80, 112, t=6, kernel_size=5, stride=1),
-            MBConv(112, 112, t=6, kernel_size=5, stride=1),
-            MBConv(112, 112, t=6, kernel_size=5, stride=1),
+            *(8 * [MBConv(128, 128, t=6)] + [MBConv(128, 160, stride=1, t=6)])
         )
         self.down6 = nn.Sequential(
-            MBConv(112, 192, t=6, kernel_size=5, stride=2),
-            MBConv(192, 192, t=6, kernel_size=5, stride=1),
-            MBConv(192, 192, t=6, kernel_size=5, stride=1),
-            MBConv(192, 192, t=6, kernel_size=5, stride=1),
-        )
-        self.down7 = MBConv(192, 320)
-
-        self.up1 = UpSamplingConcatenate(320, 192, bottleneck=MBConv(384, 192))
-        self.up2 = UpSamplingConcatenate(
-            192,
-            112,
-            bottleneck=nn.Sequential(
-                MBConv(224, 112, t=6, kernel_size=5, stride=2),
-                MBConv(112, 112, t=6, kernel_size=5, stride=1),
-                MBConv(112, 112, t=6, kernel_size=5, stride=1),
-                MBConv(112, 112, t=6, kernel_size=5, stride=1),
-            ),
-        )
-        self.up3 = UpSamplingConcatenate(
-            112,
-            80,
-            bottleneck=nn.Sequential(
-                MBConv(160, 80, t=6, kernel_size=5, stride=1),
-                MBConv(80, 80, t=6, kernel_size=5, stride=1),
-                MBConv(80, 80, t=6, kernel_size=5, stride=1),
-            ),
+            *(14 * [MBConv(160, 160, t=6)] + [MBConv(160, 256, stride=2, t=6)])
         )
 
-        self.up4 = UpSamplingConcatenate(
-            80,
-            40,
-            bottleneck=nn.Sequential(
-                MBConv(80, 40, t=6, kernel_size=3, stride=2),
-                MBConv(40, 40, t=6, kernel_size=3, stride=1),
-                MBConv(40, 40, t=6, kernel_size=3, stride=1),
-            ),
-        )
+        self.up1 = Up(256, 160)
+        self.up2 = Up(160, 128)
+        self.up3 = Up(128, 64)
+        self.up4 = Up(64, 48)
+        self.up5 = Up(48, 24)
+        self.up6 = Up(24, 24)
 
-        self.up5 = UpSamplingConcatenate(
-            40,
-            24,
-            bottleneck=nn.Sequential(
-                MBConv(48, 24, t=6, kernel_size=5, stride=2),
-                MBConv(24, 24, t=6, kernel_size=5, stride=1),
-            ),
-        )
-
-        self.up6 = UpSamplingConcatenate(
-            24,
-            16,
-            bottleneck=nn.Sequential(
-                MBConv(32, 16, t=6, kernel_size=3, stride=2),
-                MBConv(16, 16, t=6, kernel_size=3, stride=1),
-            ),
-        )
-        self.up7 = TransposeMBConv(16, 16, stride=2, kernel_size=2)
-        
-
-        # Final
-        self.outconv = nn.Sequential(
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.001),
-            nn.Conv2d(16, n_classes, kernel_size=3, padding=1),
-        )
+        self.outconv = nn.ConvTranspose2d(24, n_classes, kernel_size=2, stride=2)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         # Encoding
-        x = self.conv1(x)
-        x1 = self.down1(x)
+        x0 = self.stem(x)
+        x1 = self.down1(x0)
         x2 = self.down2(x1)
         x3 = self.down3(x2)
         x4 = self.down4(x3)
         x5 = self.down5(x4)
         x6 = self.down6(x5)
-        x7 = self.down7(x6)
 
         # Decoding
-        x = self.up1(x7, x6)
-        x = self.up2(x, x5)
-        x = self.up3(x, x4)
-        x = self.up4(x, x3)
-        x = self.up5(x, x2)
-        x = self.up6(x, x1)
-        x = self.up7(x)
-        x = self.outconv(x)
+        x = self.up1(x6, x5)
+        x = self.up2(x, x4)
+        x = self.up3(x, x3)
+        x = self.up4(x, x2)
+        x = self.up5(x, x1)
+        x = self.up6(x, x0)
 
-        # Sigmoid
-        x = self.sigmoid(x)
+        # Head
+        x = self.sigmoid(self.outconv(x))
 
         return x
