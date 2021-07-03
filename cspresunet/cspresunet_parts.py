@@ -33,6 +33,7 @@ class LevelBlock(nn.Module):
                 kernel_size=3,
                 padding=1,
                 stride=self.stride[0],
+                bias=False,
             ),
             nn.BatchNorm2d(mid_channels),
             nn.ReLU(inplace=True),
@@ -42,11 +43,26 @@ class LevelBlock(nn.Module):
                 kernel_size=3,
                 padding=1,
                 stride=self.stride[1],
+                bias=False,
             ),
         )
 
     def forward(self, x):
         return self.double_conv(x)
+
+
+class Down(nn.Module):
+    """Downscaling with maxpool then double conv"""
+
+    def __init__(self, in_channels, out_channels, stride=(1,1)):
+        super().__init__()
+        self.stride = stride
+        self.level_block = LevelBlock(in_channels, out_channels, stride=self.stride)
+        self.shortcut = nn.Conv2d(in_channels, out_channels, 1)
+
+    def forward(self, x):
+        x = self.level_block(x) + self.shortcut(x)
+        return  x
 
 
 class UpSamplingConcatenate(nn.Module):
@@ -65,4 +81,22 @@ class UpSamplingConcatenate(nn.Module):
 
         x = torch.cat([x2, x1], dim=1)
 
+        return x
+
+
+
+
+class InConv(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.stem_block = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 3, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels, out_channels, 3, padding=1, bias=False),
+        )
+        self.shortcut = nn.Conv2d(in_channels, out_channels, 1)
+
+    def forward(self, x):
+        x = self.stem_block(x) + self.shortcut(x)
         return x
