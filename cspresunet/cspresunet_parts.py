@@ -30,8 +30,8 @@ class CSPLevelBlock(nn.Module):
                 in_channels,
                 exp_channels,
                 kernel_size=1,
-                bias=False,
                 stride=self.stride[0],
+                bias=False,
             ),
         )
         in_channels = exp_channels // 2
@@ -129,7 +129,9 @@ class LevelBlock(nn.Module):
 class Down(nn.Module):
     """Downscaling with maxpool then double conv"""
 
-    def __init__(self, in_channels, out_channels, stride=(1, 1), use_csp=True):
+    def __init__(
+        self, in_channels, out_channels, stride=(1, 1), use_csp=True, expand_ratio=1.0
+    ):
         super().__init__()
         self.stride = stride
         if use_csp:
@@ -147,7 +149,9 @@ class Down(nn.Module):
 class Up(nn.Module):
     """Upscaling"""
 
-    def __init__(self, in_channels, out_channels, stride=(1, 1), use_csp=True):
+    def __init__(
+        self, in_channels, out_channels, stride=(1, 1), use_csp=True, expand_ratio=1.0
+    ):
         super().__init__()
         self.stride = stride
         self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
@@ -221,7 +225,6 @@ class Stem(nn.Module):
             x = self.expand_layer(x)
             half = x.size(1) // 2
             part1, part2 = x[:, :half], x[:, half:]
-            print(self.stem_block(part2).shape)
             part2 = self.partial_trans2((self.stem_block(part2) + self.shortcut(part2)))
             x = self.partial_trans_head(torch.cat([part1, part2], dim=1))
         else:
