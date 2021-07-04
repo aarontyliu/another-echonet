@@ -58,7 +58,6 @@ class CSPLevelBlock(nn.Module):
                 bias=False,
             ),
         )
-        self.shortcut = nn.Conv2d(in_channels, in_channels, 1, bias=False)
 
         self.partial_trans2 = nn.Sequential(
             nn.BatchNorm2d(in_channels),
@@ -76,8 +75,9 @@ class CSPLevelBlock(nn.Module):
         x = self.expand_layer(x)
         half = x.size(1) // 2
         part1, part2 = x[:, :half], x[:, half:]
-        part2 = self.partial_trans2((self.double_conv(part2) + self.shortcut(part2)))
+        part2 = self.partial_trans2((self.double_conv(part2) + part2))
         x = self.partial_trans_head(torch.cat([part1, part2], dim=1))
+
         return x
 
 
@@ -128,13 +128,13 @@ class LevelBlock(nn.Module):
 
 class Down(nn.Module):
     def __init__(
-        self, in_channels, out_channels, stride=(1, 1), use_csp=True, expand_ratio=1.0
+        self, in_channels, out_channels, stride=(2, 1), use_csp=True, expand_ratio=1.0
     ):
         super().__init__()
         self.stride = stride
         if use_csp:
             self.level_block = CSPLevelBlock(
-                in_channels, out_channels, stride=self.stride
+                in_channels, out_channels, self.stride, expand_ratio
             )
         else:
             self.level_block = LevelBlock(in_channels, out_channels, stride=self.stride)
@@ -153,7 +153,7 @@ class Up(nn.Module):
         self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
         if use_csp:
             self.level_block = CSPLevelBlock(
-                in_channels, out_channels, stride=self.stride
+                in_channels, out_channels, self.stride, expand_ratio
             )
         else:
             self.level_block = LevelBlock(in_channels, out_channels, stride=self.stride)
@@ -194,7 +194,6 @@ class Stem(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Conv2d(in_channels, in_channels, 3, padding=1, bias=False),
             )
-            self.shortcut = nn.Conv2d(in_channels, in_channels, 1, bias=False)
 
             self.partial_trans2 = nn.Sequential(
                 nn.BatchNorm2d(in_channels),
@@ -221,7 +220,7 @@ class Stem(nn.Module):
             x = self.expand_layer(x)
             half = x.size(1) // 2
             part1, part2 = x[:, :half], x[:, half:]
-            part2 = self.partial_trans2((self.stem_block(part2) + self.shortcut(part2)))
+            part2 = self.partial_trans2((self.stem_block(part2) + part2))
             x = self.partial_trans_head(torch.cat([part1, part2], dim=1))
         else:
             x = self.stem_block(x) + self.shortcut(x)
