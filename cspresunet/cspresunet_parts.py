@@ -127,8 +127,6 @@ class LevelBlock(nn.Module):
 
 
 class Down(nn.Module):
-    """Downscaling with maxpool then double conv"""
-
     def __init__(
         self, in_channels, out_channels, stride=(1, 1), use_csp=True, expand_ratio=1.0
     ):
@@ -147,8 +145,6 @@ class Down(nn.Module):
 
 
 class Up(nn.Module):
-    """Upscaling"""
-
     def __init__(
         self, in_channels, out_channels, stride=(1, 1), use_csp=True, expand_ratio=1.0
     ):
