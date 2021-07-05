@@ -1,7 +1,7 @@
 """
    Author: Aaron Liu
    Email: tl254@duke.edu
-   Created on: July 3 2021
+   Created on: July 5 2021
 """
 
 import torch
@@ -25,14 +25,16 @@ class CSPResUNet(nn.Module):
         self.up2 = Up(256, 128, (1, 1), use_csp, expand_ratio)
         self.up3 = Up(128, 64, (1, 1), use_csp, expand_ratio)
 
-        self.outconv = nn.Conv2d(64, n_classes, 1, bias=False)
+        self.outconv = nn.Conv2d(64, n_classes, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
+        # Encoding
         x1 = self.stem(x)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
         x4 = self.down3(x3)
+        # Decoding
         x = self.up1(x4, x3)
         x = self.up2(x, x2)
         x = self.up3(x, x1)

@@ -20,7 +20,7 @@ class CSPLevelBlock(nn.Module):
         in_channels,
         out_channels,
         stride=(1, 1),
-        expand_ratio=1.0,
+        expand_ratio=1.0
     ):
         super().__init__()
         self.stride = stride
@@ -38,6 +38,7 @@ class CSPLevelBlock(nn.Module):
             ),
         )
         in_channels = exp_channels // 2
+        self.se = SE(in_channels)
         self.stride = stride
         self.double_conv = nn.Sequential(
             nn.BatchNorm2d(in_channels),
@@ -79,7 +80,7 @@ class CSPLevelBlock(nn.Module):
         x = self.expand_layer(x)
         half = x.size(1) // 2
         part1, part2 = x[:, :half], x[:, half:]
-        part2 = self.partial_trans2((self.double_conv(part2) + part2)).contiguous()
+        part2 = self.partial_trans2((self.se(self.double_conv(part2)) + part2)).contiguous()
         x = self.partial_trans_head(torch.cat([part1, part2], dim=1))
 
         return x
@@ -192,6 +193,8 @@ class Stem(nn.Module):
                 ),
             )
             in_channels = exp_channels // 2
+            
+            self.se = SE(in_channels)
             self.stem_block = nn.Sequential(
                 nn.BatchNorm2d(in_channels),
                 nn.ReLU(inplace=True),
@@ -226,7 +229,7 @@ class Stem(nn.Module):
             x = self.expand_layer(x)
             half = x.size(1) // 2
             part1, part2 = x[:, :half], x[:, half:]
-            part2 = self.partial_trans2((self.stem_block(part2) + part2)).contiguous()
+            part2 = self.partial_trans2((self.se(self.stem_block(part2)) + part2)).contiguous()
             x = self.partial_trans_head(torch.cat([part1, part2], dim=1))
         else:
             x = self.stem_block(x) + self.shortcut(x)
@@ -243,38 +246,6 @@ class MixPooling(nn.Module):
     def forward(self, x):
         gamma = torch.sigmoid(self.gamma)
         return gamma * self.max_pool2d(x) + (1 - gamma) * self.avg_pool2d(x)
-
-
-class DetailPreserPool(nn.Module):
-    """Detailed-Preserving Pooling"""
-
-    def __init__(self, kernel_size=2, stride=None, padding=0, variant="sym"):
-        super().__init__()
-        self.filter = nn.Conv2d(
-            in_channels, in_channels, kernel_size=3, padding=1, bias=False
-        )
-        self.k = _pair(kernel_size)
-        if not stride:
-            self.stride = _pair(kernel_size)
-        else:
-            self.stride = _pair(stride)
-        self.padding = _quadruple(padding)  # convert to l, r, t, b
-
-    def _padding(self, x):
-        padding = self.padding
-        return padding
-
-    def _pho(self, x, beta=0.5, variant="sym"):
-        if variant == "sym":
-            return torch.sqrt(x ** 2 + 1e-6) ** beta
-
-    def forward(self, I):
-        I_ = self.filter(I)
-
-        x = F.pad(x, self._padding(x), mode="reflect")
-        x = x.unfold(2, self.k[0], self.stride[0]).unfold(3, self.k[1], self.stride[1])
-        x = x.contiguous().view(x.size()[:4] + (-1,)).median(dim=-1)[0]
-        return x
 
 
 # Experimenting
@@ -314,3 +285,27 @@ class SelfAttenion(nn.Module):
         output = x + self.gamma * o
 
         return F.avg_pool2d(output, 2)
+
+
+class SE(nn.Module):
+    """Squeeze and Excitation"""
+    def __init__(self, in_channels, se_ratio=0.25):
+        super(SE, self).__init__()
+        num_squeezed_channels = max(1, int( in_channels * se_ratio))
+
+        self.squeeze = nn.AdaptiveAvgPool2d(1)
+        self.bchw2bc = Rearrange('b c h w -> b (c h w)')
+        self.bc2bchw = Rearrange('b c -> b c () ()')
+
+        self.reduce_expand = nn.Sequential(
+            nn.Linear(in_channels, num_squeezed_channels, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Linear(num_squeezed_channels, in_channels, bias=False),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        b, c, _, _ = x.size()
+        out = self.bchw2bc(self.squeeze(x))
+        out = self.bc2bchw(self.reduce_expand(out))
+        return x * out
