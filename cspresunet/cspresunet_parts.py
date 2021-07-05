@@ -28,7 +28,7 @@ class CSPLevelBlock(nn.Module):
         exp_channels = int(round(out_channels * expand_ratio))
         self.expand_layer = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels,
                 exp_channels,
@@ -41,7 +41,7 @@ class CSPLevelBlock(nn.Module):
         self.stride = stride
         self.double_conv = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels,
                 in_channels,
@@ -51,7 +51,7 @@ class CSPLevelBlock(nn.Module):
                 bias=False,
             ),
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels,
                 in_channels,
@@ -64,13 +64,13 @@ class CSPLevelBlock(nn.Module):
 
         self.partial_trans2 = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(in_channels, in_channels, 1, bias=False),
         )
 
         self.partial_trans_head = nn.Sequential(
             nn.BatchNorm2d(exp_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(exp_channels, out_channels, 1, bias=False),
         )
 
@@ -156,7 +156,7 @@ class Up(nn.Module):
         self.stride = stride
         self.up = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.ConvTranspose2d(
                 in_channels, out_channels, kernel_size=2, stride=2, bias=False
             ),
@@ -194,29 +194,29 @@ class Stem(nn.Module):
             in_channels = exp_channels // 2
             self.stem_block = nn.Sequential(
                 nn.BatchNorm2d(in_channels),
-                nn.Mish(inplace=True),
+                nn.ReLU(inplace=True),
                 nn.Conv2d(in_channels, in_channels, 3, padding=1, bias=False),
                 nn.BatchNorm2d(in_channels),
-                nn.Mish(inplace=True),
+                nn.ReLU(inplace=True),
                 nn.Conv2d(in_channels, in_channels, 3, padding=1, bias=False),
             )
 
             self.partial_trans2 = nn.Sequential(
                 nn.BatchNorm2d(in_channels),
-                nn.Mish(inplace=True),
+                nn.ReLU(inplace=True),
                 nn.Conv2d(in_channels, in_channels, 1, bias=False),
             )
 
             self.partial_trans_head = nn.Sequential(
                 nn.BatchNorm2d(exp_channels),
-                nn.Mish(inplace=True),
+                nn.ReLU(inplace=True),
                 nn.Conv2d(exp_channels, out_channels, 1, bias=False),
             )
         else:
             self.stem_block = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, 3, padding=1, bias=False),
                 nn.BatchNorm2d(out_channels),
-                nn.Mish(inplace=True),
+                nn.ReLU(inplace=True),
                 nn.Conv2d(out_channels, out_channels, 3, padding=1, bias=False),
             )
             self.shortcut = nn.Conv2d(in_channels, out_channels, 1, bias=False)
@@ -245,7 +245,7 @@ class MixPooling(nn.Module):
         return gamma * self.max_pool2d(x) + (1 - gamma) * self.avg_pool2d(x)
 
 
-class DetailPreservegPool(nn.Module):
+class DetailPreserPool(nn.Module):
     """Detailed-Preserving Pooling"""
 
     def __init__(self, kernel_size=2, stride=None, padding=0, variant="sym"):
