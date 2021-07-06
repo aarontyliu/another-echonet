@@ -1,8 +1,8 @@
 """
-   Author: Aaron Liu
-   Email: tl254@duke.edu
-   Created on: July 2 2021
-   Code structure reference: https://github.com/milesial/Pytorch-UNet
+    Author: Aaron Liu
+    Email: tl254@duke.edu
+    Created on: July 2 2021
+    Code structure reference: https://github.com/milesial/Pytorch-UNet
 """
 
 import einops
@@ -13,12 +13,40 @@ from einops.layers.torch import Rearrange, Reduce
 
 
 class CSPLevelBlock(nn.Module):
-    """(BN ==> ReLU ==> Conv) x 2 + CSP pre-activation shortcut"""
+    """
+          Input (x)
+             |
+         Expanding (for cross stage partial design)
+             |
+        Part1, Part2
+         /       |
+        /        |__________________________
+       /         |                          |
+      /      BatchNorm2d                    |
+     /          ReLU                        |
+    |          Conv2d                       |
+    |            |                          |
+    |        BatchNorm2d              Pre-activation Shortcut
+    |           ReLU                        |
+    |          Conv2d                       |
+    |            |                          |
+    |   Squeeze and Excite (SE)             |
+    |            |__________________________|
+    |            |
+    |        Transition
+    |            |
+    |______ ______|
+           |
+           |
+       Transition
+           |
+         Output
 
-    def __init__(self, in_channels, out_channels, stride=(1, 1), expand_ratio=1.0):
-        super().__init__()
-        self.stride = stride
-        self.channeling = MixPooling() if stride[0] == 2 else nn.Identity()
+    """
+
+    def __init__(self, in_channels, out_channels, expand_ratio=1.0):
+        super(CSPLevelBlock, self).__init__()
+        assert expand_ratio > 0
         exp_channels = int(round(out_channels * expand_ratio))
         self.expand_layer = nn.Sequential(
             nn.BatchNorm2d(in_channels),
@@ -27,13 +55,11 @@ class CSPLevelBlock(nn.Module):
                 in_channels,
                 exp_channels,
                 kernel_size=1,
-                stride=self.stride[1],
                 bias=False,
             ),
         )
         in_channels = exp_channels // 2
         self.se = SE(in_channels)
-        self.stride = stride
         self.double_conv = nn.Sequential(
             nn.BatchNorm2d(in_channels),
             nn.ReLU(inplace=True),
@@ -42,7 +68,6 @@ class CSPLevelBlock(nn.Module):
                 in_channels,
                 kernel_size=3,
                 padding=1,
-                stride=self.stride[1],
                 bias=False,
             ),
             nn.BatchNorm2d(in_channels),
@@ -52,118 +77,57 @@ class CSPLevelBlock(nn.Module):
                 in_channels,
                 kernel_size=3,
                 padding=1,
-                stride=self.stride[1],
                 bias=False,
             ),
         )
 
-        self.partial_trans2 = nn.Sequential(
+        self.transition_pt2 = nn.Sequential(
             nn.BatchNorm2d(in_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels, in_channels, 1, bias=False),
+            nn.Conv2d(in_channels, in_channels, kernel_size=1, bias=False),
         )
 
-        self.partial_trans_head = nn.Sequential(
+        self.transition = nn.Sequential(
             nn.BatchNorm2d(exp_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(exp_channels, out_channels, 1, bias=False),
+            nn.Conv2d(exp_channels, out_channels, kernel_size=1, bias=False),
         )
 
     def forward(self, x):
-        x = self.channeling(x)
         x = self.expand_layer(x)
         half = x.size(1) // 2
         part1, part2 = x[:, :half], x[:, half:]
-        part2 = self.partial_trans2(
+        part2 = self.transition_pt2(
             (self.se(self.double_conv(part2)) + part2)
         ).contiguous()
-        x = self.partial_trans_head(torch.cat([part1, part2], dim=1))
+        x = self.transition(torch.cat([part1, part2], dim=1))
 
-        return x
-
-
-class LevelBlock(nn.Module):
-    """(BN ==> ReLU ==> Conv) x 2 + pre-activation shortcut"""
-
-    def __init__(
-        self,
-        in_channels,
-        out_channels,
-        mid_channels=None,
-        stride=(1, 1),
-    ):
-        super().__init__()
-        if not mid_channels:
-            mid_channels = out_channels
-        self.stride = stride
-        self.double_conv = nn.Sequential(
-            nn.BatchNorm2d(in_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(
-                in_channels,
-                mid_channels,
-                kernel_size=3,
-                padding=1,
-                stride=self.stride[0],
-                bias=False,
-            ),
-            nn.BatchNorm2d(mid_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(
-                mid_channels,
-                out_channels,
-                kernel_size=3,
-                padding=1,
-                stride=self.stride[1],
-                bias=False,
-            ),
-        )
-        self.shortcut = nn.Conv2d(
-            in_channels, out_channels, 1, stride=self.stride[0], bias=False
-        )
-
-    def forward(self, x):
-        x = self.double_conv(x) + self.shortcut(x)
         return x
 
 
 class Down(nn.Module):
-    def __init__(
-        self, in_channels, out_channels, stride=(2, 1), use_csp=True, expand_ratio=1.0
-    ):
-        super().__init__()
-        self.stride = stride
-        if use_csp:
-            self.level_block = CSPLevelBlock(
-                in_channels, out_channels, self.stride, expand_ratio
-            )
-        else:
-            self.level_block = LevelBlock(in_channels, out_channels, stride=self.stride)
+    def __init__(self, in_channels, out_channels, expand_ratio=1.0):
+        super(Down, self).__init__()
+        self.mix_pool = MixPooling()
+        self.level_block = CSPLevelBlock(in_channels, out_channels, expand_ratio)
 
     def forward(self, x):
+        x = self.mix_pool(x)
         x = self.level_block(x)
         return x
 
 
 class Up(nn.Module):
-    def __init__(
-        self, in_channels, out_channels, stride=(1, 1), use_csp=True, expand_ratio=1.0
-    ):
-        super().__init__()
-        self.stride = stride
+    def __init__(self, in_channels, out_channels, expand_ratio=1.0, dropout=0):
+        super(Up, self).__init__()
         self.up = nn.Sequential(
-            nn.BatchNorm2d(in_channels),
+            IC(in_channels, dropout),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(
                 in_channels, out_channels, kernel_size=2, stride=2, bias=False
             ),
         )
-        if use_csp:
-            self.level_block = CSPLevelBlock(
-                in_channels, out_channels, self.stride, expand_ratio
-            )
-        else:
-            self.level_block = LevelBlock(in_channels, out_channels, stride=self.stride)
+        self.level_block = CSPLevelBlock(in_channels, out_channels, expand_ratio)
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
@@ -172,71 +136,9 @@ class Up(nn.Module):
         return x
 
 
-class Stem(nn.Module):
-    def __init__(self, in_channels, out_channels, use_csp=True, expand_ratio=1.0):
-        super().__init__()
-
-        self.use_csp = 0
-        if use_csp:
-            self.use_csp = 1
-            exp_channels = int(round(out_channels * expand_ratio))
-            self.expand_layer = nn.Sequential(
-                nn.Conv2d(
-                    in_channels,
-                    exp_channels,
-                    kernel_size=1,
-                    bias=False,
-                ),
-            )
-            in_channels = exp_channels // 2
-
-            self.se = SE(in_channels)
-            self.stem_block = nn.Sequential(
-                nn.BatchNorm2d(in_channels),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(in_channels, in_channels, 3, padding=1, bias=False),
-                nn.BatchNorm2d(in_channels),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(in_channels, in_channels, 3, padding=1, bias=False),
-            )
-
-            self.partial_trans2 = nn.Sequential(
-                nn.BatchNorm2d(in_channels),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(in_channels, in_channels, 1, bias=False),
-            )
-
-            self.partial_trans_head = nn.Sequential(
-                nn.BatchNorm2d(exp_channels),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(exp_channels, out_channels, 1, bias=False),
-            )
-        else:
-            self.stem_block = nn.Sequential(
-                nn.Conv2d(in_channels, out_channels, 3, padding=1, bias=False),
-                nn.BatchNorm2d(out_channels),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(out_channels, out_channels, 3, padding=1, bias=False),
-            )
-            self.shortcut = nn.Conv2d(in_channels, out_channels, 1, bias=False)
-
-    def forward(self, x):
-        if self.use_csp:
-            x = self.expand_layer(x)
-            half = x.size(1) // 2
-            part1, part2 = x[:, :half], x[:, half:]
-            part2 = self.partial_trans2(
-                (self.se(self.stem_block(part2)) + part2)
-            ).contiguous()
-            x = self.partial_trans_head(torch.cat([part1, part2], dim=1))
-        else:
-            x = self.stem_block(x) + self.shortcut(x)
-        return x
-
-
 class MixPooling(nn.Module):
     def __init__(self, kernel_size=2):
-        super().__init__()
+        super(MixPooling, self).__init__()
         self.max_pool2d = nn.MaxPool2d(kernel_size)
         self.avg_pool2d = nn.AvgPool2d(kernel_size)
         self.gamma = nn.Parameter(torch.Tensor([0.5]))
@@ -247,7 +149,7 @@ class MixPooling(nn.Module):
 
 
 class SE(nn.Module):
-    """Squeeze and Excitation"""
+    """Squeeze and Excitation on means * variances"""
 
     def __init__(self, in_channels, se_ratio=0.5):
         super(SE, self).__init__()
@@ -255,7 +157,7 @@ class SE(nn.Module):
         self.squeeze = nn.AdaptiveAvgPool2d(1)
         self.reduce_expand = nn.Sequential(
             nn.Conv2d(in_channels, num_squeezed_channels, 1),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(num_squeezed_channels, in_channels, 1),
             nn.Sigmoid(),
         )
@@ -263,8 +165,21 @@ class SE(nn.Module):
     def forward(self, x):
         means = self.squeeze(x)
         variances = self.squeeze((x - means) ** 2)
-        attn = self.reduce_expand(means * variances)  # B x C x 1 x 1
+        attn = self.reduce_expand(means * variances)
         return x * attn
+
+
+class IC(nn.Module):
+    """Independent component"""
+
+    def __init__(self, in_channels, p=0.05):
+        super(IC, self).__init__()
+        self.ic = nn.Sequential(
+            nn.BatchNorm2d(in_channels), nn.Dropout(p, inplace=True)
+        )
+
+    def forward(self, x):
+        return self.ic(x)
 
 
 # Experimenting
