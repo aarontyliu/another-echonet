@@ -259,10 +259,6 @@ class SE(nn.Module):
         return x * attn
 
 
-
-
-
-
 class SE3(nn.Module):
     """Squeeze and Excitation on means * variances"""
 
@@ -270,34 +266,35 @@ class SE3(nn.Module):
         super(SE3, self).__init__()
         num_squeezed_channels = max(1, int(in_channels * se_ratio))
         self.squeeze = nn.AdaptiveAvgPool2d(1)
-        self.view4w = nn.Sequential(Rearrange('b c h w -> b w c h'))
-        self.viewbk4w = Rearrange('b w c h -> b c h w')
-        self.view4h = nn.Sequential(Rearrange('b c h w -> b h c w'))
-        self.viewbk4h = Rearrange('b h c w -> b c h w')
+        self.view4w = nn.Sequential(Rearrange("b c h w -> b w c h"))
+        self.viewbk4w = Rearrange("b w c h -> b c h w")
+        self.view4h = nn.Sequential(Rearrange("b c h w -> b h c w"))
+        self.viewbk4h = Rearrange("b h c w -> b c h w")
         self.sigmoid = nn.Sigmoid()
-#         self.reduce_expand = nn.Sequential(
-#             nn.Conv2d(in_channels, num_squeezed_channels, 1),
-#             nn.ReLU(inplace=True),
-#             nn.Conv2d(num_squeezed_channels, in_channels, 1),
-#             nn.Sigmoid(),
-#         )
+
+    #         self.reduce_expand = nn.Sequential(
+    #             nn.Conv2d(in_channels, num_squeezed_channels, 1),
+    #             nn.ReLU(inplace=True),
+    #             nn.Conv2d(num_squeezed_channels, in_channels, 1),
+    #             nn.Sigmoid(),
+    #         )
 
     def forward(self, x):
         mean_w = self.squeeze(self.view4w(x))
         var_w = self.squeeze((self.view4w(x) - mean_w) ** 2)
         weight_w = self.sigmoid(self.viewbk4w(mean_w * var_w))
-        
+
         mean_h = self.squeeze(self.view4h(x))
         var_h = self.squeeze((self.view4h(x) - mean_h) ** 2)
         weight_h = self.sigmoid(self.viewbk4h(mean_h * var_h))
-        
+
         mean_c = self.squeeze(x)
         var_c = self.squeeze((x - mean_c) ** 2)
         weight_c = self.sigmoid(mean_c * var_c)
-#         print(weight_h * weight_w * weight_c)
+        #         print(weight_h * weight_w * weight_c)
         weighted_x = self.sigmoid(weight_h * weight_w * weight_c) * x
-#         mean_c = self.squeeze(weighted_x)
-#         var_c = self.squeeze((x - mean_c) ** 2)
-#         attn = self.reduce_expand(mean_c * var_c)
-#         return x * attn
+        #         mean_c = self.squeeze(weighted_x)
+        #         var_c = self.squeeze((x - mean_c) ** 2)
+        #         attn = self.reduce_expand(mean_c * var_c)
+        #         return x * attn
         return weighted_x
