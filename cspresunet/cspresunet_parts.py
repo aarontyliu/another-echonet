@@ -38,8 +38,6 @@ class Stem(nn.Module):
            |
        Transition
            |
-    Squeeze and Excite (SE)
-           |
          Output
 
     """
@@ -89,7 +87,6 @@ class Stem(nn.Module):
             nn.BatchNorm2d(exp_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(exp_channels, out_channels, kernel_size=1, bias=False),
-            SE(out_channels),
         )
 
     def forward(self, x):
@@ -132,8 +129,6 @@ class CSPLevelBlock(nn.Module):
            |
            |
        Transition
-           |
-    Squeeze and Excite (SE)
            |
          Output
 
@@ -186,7 +181,6 @@ class CSPLevelBlock(nn.Module):
             nn.BatchNorm2d(exp_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(exp_channels, out_channels, kernel_size=1, bias=False),
-            SE(out_channels),
         )
 
     def forward(self, x):
