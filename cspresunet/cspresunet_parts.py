@@ -21,11 +21,11 @@ class Stem(nn.Module):
         /        |__________________________
        /         |                          |
       /      BatchNorm2d                    |
-     /          Mish                        |
+     /          ReLU                        |
     |          Conv2d                       |
     |            |                          |
     |        BatchNorm2d              Pre-activation Shortcut
-    |           Mish                        |
+    |           ReLU                        |
     |          Conv2d                       |
     |            |                          |
     |   Squeeze and Excite (SE)             |
@@ -58,7 +58,7 @@ class Stem(nn.Module):
         self.se = SE(in_channels)
         self.double_conv = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels,
                 in_channels,
@@ -67,7 +67,7 @@ class Stem(nn.Module):
                 bias=False,
             ),
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels,
                 in_channels,
@@ -79,13 +79,13 @@ class Stem(nn.Module):
 
         self.transition_pt2 = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(in_channels, in_channels, kernel_size=1, bias=False),
         )
 
         self.transition = nn.Sequential(
             nn.BatchNorm2d(exp_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(exp_channels, out_channels, kernel_size=1, bias=False),
         )
 
@@ -113,11 +113,11 @@ class CSPLevelBlock(nn.Module):
         /        |__________________________
        /         |                          |
       /      BatchNorm2d                    |
-     /          Mish                        |
+     /          ReLU                        |
     |          Conv2d                       |
     |            |                          |
     |        BatchNorm2d              Pre-activation Shortcut
-    |           Mish                        |
+    |           ReLU                        |
     |          Conv2d                       |
     |            |                          |
     |   Squeeze and Excite (SE)             |
@@ -140,7 +140,7 @@ class CSPLevelBlock(nn.Module):
         exp_channels = int(round(out_channels * expand_ratio))
         self.expand_layer = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels,
                 exp_channels,
@@ -152,7 +152,7 @@ class CSPLevelBlock(nn.Module):
         self.se = SE(in_channels)
         self.double_conv = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels,
                 in_channels,
@@ -161,7 +161,7 @@ class CSPLevelBlock(nn.Module):
                 bias=False,
             ),
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels,
                 in_channels,
@@ -173,13 +173,13 @@ class CSPLevelBlock(nn.Module):
 
         self.transition_pt2 = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(in_channels, in_channels, kernel_size=1, bias=False),
         )
 
         self.transition = nn.Sequential(
             nn.BatchNorm2d(exp_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(exp_channels, out_channels, kernel_size=1, bias=False),
         )
 
@@ -212,7 +212,7 @@ class Up(nn.Module):
         super(Up, self).__init__()
         self.up = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.ConvTranspose2d(
                 in_channels, out_channels, kernel_size=2, stride=2, bias=False
             ),
