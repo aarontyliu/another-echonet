@@ -11,14 +11,13 @@
         - Rethinking the Usage of Batch Normalization and Dropout: https://arxiv.org/pdf/1905.05928.pdf
         - Batch Normalization: https://arxiv.org/pdf/1502.03167.pdf
 """
-
 from torch import nn
 
 from .cspresunet_parts import Down, Stem, Up
 
 
 class CSPResUNet(nn.Module):
-    def __init__(self, n_channels, n_classes, expand_ratio=1.0):
+    def __init__(self, n_channels, n_classes, expand_ratio=1.5):
         super(CSPResUNet, self).__init__()
         self.stem = Stem(n_channels, 64, expand_ratio)
         self.down1 = Down(64, 128, expand_ratio)
