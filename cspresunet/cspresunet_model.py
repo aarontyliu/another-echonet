@@ -17,25 +17,31 @@ from .cspresunet_parts import Down, Stem, Up
 
 
 class CSPResUNet(nn.Module):
-    def __init__(self, n_channels, n_classes, expand_ratio=1.5):
+    def __init__(self, n_channels, n_classes, expand_ratio=4.0):
         super(CSPResUNet, self).__init__()
-        self.stem = Stem(n_channels, 64, expand_ratio)
-        self.down1 = Down(64, 128, expand_ratio)
-        self.down2 = Down(128, 256, expand_ratio)
-        self.down3 = Down(256, 512, expand_ratio)
-        self.up1 = Up(512, 256, expand_ratio)
-        self.up2 = Up(256, 128, expand_ratio)
-        self.up3 = Up(128, 64, expand_ratio)
-        self.outconv = nn.Conv2d(64, n_classes, 1)
+        self.stem = Stem(n_channels, 16, expand_ratio)
+        self.down1 = Down(16, 32, expand_ratio)
+        self.down2 = Down(32, 64, expand_ratio)
+        self.down3 = Down(64, 128, expand_ratio)
+        self.down4 = Down(128, 256, expand_ratio)
+
+        self.up1 = Up(256, 128, expand_ratio)
+        self.up2 = Up(128, 64, expand_ratio)
+        self.up3 = Up(64, 32, expand_ratio)
+        self.up4 = Up(32, 16, expand_ratio)
+        self.outconv = nn.Conv2d(16, n_classes, 1)
 
     def forward(self, x):
         x1 = self.stem(x)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
         x4 = self.down3(x3)
-        x = self.up1(x4, x3)
-        x = self.up2(x, x2)
-        x = self.up3(x, x1)
+        x5 = self.down4(x4)
+
+        x = self.up1(x5, x4)
+        x = self.up2(x, x3)
+        x = self.up3(x, x2)
+        x = self.up4(x, x1)
         x = self.outconv(x)
 
         return x
