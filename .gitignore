@@ -134,3 +134,6 @@ checkpoints/
 
 # output 
 output/*.avi
+
+# logs
+logs
