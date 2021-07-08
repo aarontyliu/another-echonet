@@ -7,8 +7,10 @@
 
 import torch
 
+
 class LogCoshLoss(torch.nn.Module):
-    '''Log Cosh Loss (regression loss)'''
+    """Log Cosh Loss (regression loss)"""
+
     def __init__(self):
         super().__init__()
         self.eps = torch.finfo(torch.float32).eps

@@ -16,10 +16,11 @@ from unet import UNet
 
 
 class EchoNet(nn.Module):
-    '''Baseline model to predict mask, volume and EF (if used on video stream)
-        x -> (UNet) -> mask -> (resnet18) -> volume
-        x -> (LSTM) -> EF
-    '''
+    """Baseline model to predict mask, volume and EF (if used on video stream)
+    x -> (UNet) -> mask -> (resnet18) -> volume
+    x -> (LSTM) -> EF
+    """
+
     def __init__(self, device, encoder_hidden_dim=256):
         super(EchoNet, self).__init__()
         self.device = device
@@ -85,7 +86,7 @@ class EchoNet(nn.Module):
             return x
 
     def embed(self, x):
-        '''Embed video in batches to reduce memory cost'''
+        """Embed video in batches to reduce memory cost"""
         embeddings = torch.stack(
             [
                 torch.cat(
@@ -101,7 +102,7 @@ class EchoNet(nn.Module):
         return embeddings.to(self.device)
 
     def _get_pseudo_ef(self, x):
-        '''Generate pseudo EF (weakly supervision) to train LSTM'''
+        """Generate pseudo EF (weakly supervision) to train LSTM"""
         with torch.no_grad():
             vs = torch.stack(
                 [self.regressor(k) for k in self.embed(x).permute(1, 0, 2)]

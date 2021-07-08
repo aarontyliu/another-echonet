@@ -256,7 +256,7 @@ class GATHead(nn.Module):
         return out
 
     def _construct_graph(self, image_h, image_w, n_neighbor=3):
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = "cuda" if torch.cuda.is_available() else "cpu"
         total = image_h * image_h
         adj = torch.zeros(total, total)
         m = torch.arange(total).view(image_h, image_w)

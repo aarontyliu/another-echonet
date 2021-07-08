@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 
 def grayscale_tensor(clip_path: str):
-    '''Load video into torch.Tensor, and transpose'''
+    """Load video into torch.Tensor, and transpose"""
     video = read_video(clip_path, pts_unit="sec")[0].permute(0, 3, 1, 2) / 255.0
     grayscaled = transforms.Grayscale(num_output_channels=1)(video)
 
@@ -27,7 +27,7 @@ def grayscale_tensor(clip_path: str):
 
 
 def video_2_masks_and_volumes(grayscaled, model, batch_size=32):
-    '''Generating mask and volume predictions'''
+    """Generating mask and volume predictions"""
     masks, volumes = [], []
     model.eval()
     with torch.no_grad():
@@ -46,7 +46,7 @@ def video_2_masks_and_volumes(grayscaled, model, batch_size=32):
 
 
 def get_masked_video_tensor(video_tensor, masks, color="blue", strict=True):
-    '''Allign masks with input video'''
+    """Allign masks with input video"""
     valid_colors = ("red", "green", "blue")
     assert color in valid_colors, f"color arg needs to be in {valid_colors}!"
     palette = {"red": 0, "green": 1, "blue": 2}
@@ -65,7 +65,7 @@ def get_masked_video_tensor(video_tensor, masks, color="blue", strict=True):
 def write_video(
     file_name, masked_video_tensor, fps, volumes=None, ekg=True, output_dir="output"
 ):
-    '''Export masked video'''
+    """Export masked video"""
     masked_video_tensor = masked_video_tensor.detach().cpu()
     assert isinstance(fps, float)
     if volumes is not None:
