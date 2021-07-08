@@ -225,4 +225,6 @@ class SE(nn.Module):
         means = self.squeeze(x)
         variances = self.squeeze((x - means) ** 2)
         attn = self.reduce_expand(means * variances)
-        return x * attn
+        order = attn.argsort(dim=1).flatten()
+        
+        return (x * attn)[:, order]
