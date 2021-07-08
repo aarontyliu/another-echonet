@@ -13,7 +13,7 @@
 """
 from torch import nn
 
-from .cspresunet_parts import Down, Stem, Up
+from .cspresunet_parts import Down, Stem, Up, GATHead
 
 
 class CSPResUNet(nn.Module):
@@ -29,7 +29,8 @@ class CSPResUNet(nn.Module):
         self.up2 = Up(128, 64, expand_ratio)
         self.up3 = Up(64, 32, expand_ratio)
         self.up4 = Up(32, 16, expand_ratio)
-        self.outconv = nn.Conv2d(16, n_classes, 1)
+        # self.head = nn.Conv2d(16, n_classes, 1)
+        self.head = GATHead(16, n_classes, 8, 112, 112)
 
     def forward(self, x):
         x1 = self.stem(x)
@@ -42,6 +43,7 @@ class CSPResUNet(nn.Module):
         x = self.up2(x, x3)
         x = self.up3(x, x2)
         x = self.up4(x, x1)
-        x = self.outconv(x)
+        # x = self.gat_head(x)
+        x = self.head(x)
 
         return x
