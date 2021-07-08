@@ -21,7 +21,12 @@ class CSPResUNet(nn.Module):
         self.down1 = Down(16, 32, expand_ratio)
         self.down2 = Down(32, 64, expand_ratio)
         self.down3 = Down(64, 128, expand_ratio)
-
+        # Coordinator module needed:
+        #   - Bridge semantic gaps between feature maps from encoders and decoders
+        #   - Sync resolution across different levels
+        #   * Tech requirements:
+        #       1. Take inputs with different resolution
+        #       2. Allow information to flow into differnet resolution parts while resolving semantic gap issue
         self.up1 = Up(128, 64, expand_ratio)
         self.up2 = Up(64, 32, expand_ratio)
         self.up3 = Up(32, 16, expand_ratio)

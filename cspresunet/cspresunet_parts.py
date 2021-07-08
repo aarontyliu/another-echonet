@@ -44,12 +44,7 @@ class Stem(nn.Module):
         assert expand_ratio > 0.0
         exp_channels = int(round(out_channels * expand_ratio))
         self.expand_layer = nn.Sequential(
-            nn.Conv2d(
-                in_channels,
-                exp_channels,
-                kernel_size=1,
-                bias=False,
-            ),
+            nn.Conv2d(in_channels, exp_channels, kernel_size=1, bias=False),
         )
         in_channels = exp_channels // 2
         self.se = SE(in_channels)
@@ -69,7 +64,9 @@ class Stem(nn.Module):
         self.transition_pt2 = nn.Sequential(
             nn.BatchNorm2d(in_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels, in_channels, kernel_size=1, bias=False),
+            nn.Conv2d(
+                in_channels, in_channels, kernel_size=1, bias=False, groups=in_channels
+            ),
         )
 
         self.transition = nn.Sequential(
@@ -125,12 +122,7 @@ class CSPLevelBlock(nn.Module):
         self.expand_layer = nn.Sequential(
             nn.BatchNorm2d(in_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(
-                in_channels,
-                exp_channels,
-                kernel_size=1,
-                bias=False,
-            ),
+            nn.Conv2d(in_channels, exp_channels, kernel_size=1, bias=False),
         )
         in_channels = exp_channels // 2
         self.se = SE(in_channels)
@@ -150,7 +142,9 @@ class CSPLevelBlock(nn.Module):
         self.transition_pt2 = nn.Sequential(
             nn.BatchNorm2d(in_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels, in_channels, kernel_size=1, bias=False),
+            nn.Conv2d(
+                in_channels, in_channels, kernel_size=1, bias=False, groups=in_channels
+            ),
         )
 
         self.transition = nn.Sequential(
@@ -172,12 +166,11 @@ class CSPLevelBlock(nn.Module):
 class Down(nn.Module):
     def __init__(self, in_channels, out_channels, expand_ratio=1.0):
         super(Down, self).__init__()
-        self.max_pool = nn.MaxPool2d(2)
+        self.max_pool = nn.MaxPool2d(2)  # Better to use DPP
         self.level_block = CSPLevelBlock(in_channels, out_channels, expand_ratio)
 
     def forward(self, x):
-        x = self.max_pool(x)
-        x = self.level_block(x)
+        x = self.level_block(self.max_pool(x))
         return x
 
 
@@ -215,7 +208,7 @@ class SE(nn.Module):
         self.squeeze = nn.AdaptiveAvgPool2d(1)
         self.reduce_expand = nn.Sequential(
             nn.Conv2d(in_channels, num_squeezed_channels, 1),
-            nn.Mish(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(num_squeezed_channels, in_channels, 1),
             nn.Sigmoid(),
         )
@@ -225,6 +218,5 @@ class SE(nn.Module):
         means = self.squeeze(x)
         variances = self.squeeze((x - means) ** 2)
         attn = self.reduce_expand(means * variances)
-        order = attn.argsort(dim=1).flatten()
-        
-        return (x * attn)[:, order]
+
+        return x * attn
