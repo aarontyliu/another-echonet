@@ -7,10 +7,6 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-import einops
-import dgl
-from dgl.nn.pytorch import GATConv
-from einops.layers.torch import Rearrange
 
 
 class Stem(nn.Module):
@@ -199,6 +195,11 @@ class Up(nn.Module):
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
+        diffY = x2.size()[2] - x1.size()[2]
+        diffX = x2.size()[3] - x1.size()[3]
+        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+        # https://github.com/HaiyongJiang/U-Net-Pytorch-Unstructured-Buggy/commit/0e854509c2cea854e247a9c615f175f76fbb2e3a
+        # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         x = torch.cat([x2, x1], dim=1)
         x = self.level_block(x)
         return x
@@ -225,54 +226,3 @@ class SE(nn.Module):
         variances = self.squeeze((x - means) ** 2)
         attn = self.reduce_expand(means * variances)
         return x * attn
-
-
-class GATHead(nn.Module):
-    """Graph attention network"""
-
-    def __init__(
-        self, in_channels, out_channels, num_heads, image_h, image_w, hidden_dim=8
-    ):
-        super(GATHead, self).__init__()
-        self.gat_conv1 = GATConv(in_channels, hidden_dim, num_heads=num_heads)
-        self.merge = Rearrange("n c heads -> n (c heads)")
-        self.mish = nn.Mish(inplace=True)
-        self.gat_conv2 = GATConv(hidden_dim * num_heads, out_channels, num_heads=1)
-        self.g = self._construct_graph(image_h, image_w)
-        self.reshape = Rearrange("b c h w -> b (h w) c")
-        self.readout = Rearrange("b (h w) d1 d2-> b (d1 d2) h w", h=image_h, w=image_w)
-
-    def forward(self, x):
-        x = self.reshape(x)
-
-        out = torch.stack(
-            [
-                self.gat_conv2(self.g, self.merge(self.mish(self.gat_conv1(self.g, i))))
-                for i in x
-            ]
-        )
-        out = self.readout(out)
-
-        return out
-
-    def _construct_graph(self, image_h, image_w, n_neighbor=3):
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        total = image_h * image_h
-        adj = torch.zeros(total, total)
-        m = torch.arange(total).view(image_h, image_w)
-        neighbor_m = (
-            F.pad(m, (n_neighbor, n_neighbor, n_neighbor, n_neighbor), value=-1)
-            .unfold(0, 2 + n_neighbor, 1)
-            .unfold(1, 2 + n_neighbor, 1)
-        )
-        lookup_tb = einops.rearrange(neighbor_m, "h w c1 c2 -> (h w) (c1 c2)")
-        for i in range(total):
-            result = lookup_tb[i]
-            neighbors = result[(result != -1)]
-            adj[i, neighbors] = 1
-        u, v = torch.where(adj != 0)
-        g = dgl.graph((u, v))
-        bg = dgl.to_bidirected(g)
-        bg = dgl.add_self_loop(bg)
-
-        return bg.to(device)

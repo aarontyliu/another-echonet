@@ -7,13 +7,11 @@
         - Deep Residual U-Net: https://arxiv.org/pdf/1711.10684.pdf
         - CSPNet: https://arxiv.org/pdf/1911.11929.pdf
         - Squeeze-and-Excitation Networks: https://arxiv.org/pdf/1709.01507.pdf
-        - Dropout: https://dl.acm.org/doi/10.5555/2627435.2670313
-        - Rethinking the Usage of Batch Normalization and Dropout: https://arxiv.org/pdf/1905.05928.pdf
         - Batch Normalization: https://arxiv.org/pdf/1502.03167.pdf
 """
 from torch import nn
 
-from .cspresunet_parts import Down, Stem, Up, GATHead
+from .cspresunet_parts import Down, Stem, Up
 
 
 class CSPResUNet(nn.Module):
@@ -23,26 +21,21 @@ class CSPResUNet(nn.Module):
         self.down1 = Down(16, 32, expand_ratio)
         self.down2 = Down(32, 64, expand_ratio)
         self.down3 = Down(64, 128, expand_ratio)
-        self.down4 = Down(128, 256, expand_ratio)
 
-        self.up1 = Up(256, 128, expand_ratio)
-        self.up2 = Up(128, 64, expand_ratio)
-        self.up3 = Up(64, 32, expand_ratio)
-        self.up4 = Up(32, 16, expand_ratio)
-        # self.head = nn.Conv2d(16, n_classes, 1)
-        self.head = GATHead(16, n_classes, 8, 112, 112)
+        self.up1 = Up(128, 64, expand_ratio)
+        self.up2 = Up(64, 32, expand_ratio)
+        self.up3 = Up(32, 16, expand_ratio)
+        self.outconv = nn.Conv2d(16, n_classes, 1)
 
     def forward(self, x):
         x1 = self.stem(x)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
         x4 = self.down3(x3)
-        x5 = self.down4(x4)
 
-        x = self.up1(x5, x4)
-        x = self.up2(x, x3)
-        x = self.up3(x, x2)
-        x = self.up4(x, x1)
-        x = self.head(x)
+        x = self.up1(x4, x3)
+        x = self.up2(x, x2)
+        x = self.up3(x, x1)
+        x = self.outconv(x)
 
         return x
