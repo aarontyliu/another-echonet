@@ -139,5 +139,5 @@ output/*.avi
 logs
 
 # notebooks
-notebooks
+notebooks/
 
