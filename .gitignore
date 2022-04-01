@@ -137,3 +137,7 @@ output/*.avi
 
 # logs
 logs
+
+# notebooks
+.notebooks
+
