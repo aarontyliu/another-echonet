@@ -20,7 +20,7 @@ python inference.py
 
 Input video                       |  Model output
 :--------------------------------:|:----------------------------------------:
-<img src="https://github.com/tienyuliu/Precision-Medicine-EchoNet/blob/main/pics/example.gif" alt="example" style="zoom:200%;" />  | <img src="https://github.com/tienyuliu/Precision-Medicine-EchoNet/blob/main/pics/output.gif" alt="output" style="zoom:155%;" /> 
+<img src="https://github.com/tienyuliu/Precision-Medicine-EchoNet/blob/main/pics/example.gif" alt="example" style="zoom:300%;" />  | <img src="https://github.com/tienyuliu/Precision-Medicine-EchoNet/blob/main/pics/output.gif" alt="output" style="zoom:200%;" /> 
 
 The blue area is the mask produced by UNet, and the green line denotes the volume predicted by ResNet-18.
 
